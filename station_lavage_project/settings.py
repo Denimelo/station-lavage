@@ -24,6 +24,7 @@ SECRET_KEY = 'django-insecure-*ujt3o!m8_q9z@1a)+do-9ja1_8561w@_=s&b%$+a&c-1qb9@i
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+TEMPLATE_DEBUG = DEBUG
 
 ALLOWED_HOSTS = []
 
@@ -76,7 +77,7 @@ WSGI_APPLICATION = 'station_lavage_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / 'station_lavage.db',
     }
 }
 
