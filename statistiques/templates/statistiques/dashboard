@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Statistiques Aqua Nova</h2>
+<p>Bienvenue dans le module de statistiques.</p>
+{% endblock %}

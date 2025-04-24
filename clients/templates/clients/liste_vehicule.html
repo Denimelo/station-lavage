@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Mes véhicules</h2>
+  <a href="{% url 'clients:ajouter_vehicule' %}" class="btn btn-primary">Ajouter un véhicule</a>
+  <ul>
+    {% for vehicule in vehicules %}
+      <li>
+        {{ vehicule.marque }} {{ vehicule.modele }} ({{ vehicule.plaque_immatric }}) - {{ vehicule.type_vehicule }}
+        [<a href="{% url 'clients:modifier_vehicule' vehicule.pk %}">modifier</a> |
+         <a href="{% url 'clients:supprimer_vehicule' vehicule.pk %}">supprimer</a>]
+      </li>
+    {% empty %}
+      <li>Aucun véhicule enregistré.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

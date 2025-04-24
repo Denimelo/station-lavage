@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Bienvenue sur votre espace client, {{ user.first_name }} !</h1>
+<div class="dashboard">
+    <p><strong>Vos actions possibles :</strong></p>
+    <ul>
+        <li><a href="{% url 'reservations:mes_reservations' %}">Voir mes réservations</a></li>
+        <li><a href="{% url 'reservations:nouvelle_reservation' %}">Prendre un nouveau rendez-vous</a></li>
+        <li><a href="{% url 'clients:vehicules' %}">Gérer mes véhicules</a></li>
+    </ul>
+</div>
+{% endblock %}

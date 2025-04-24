@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Connexion - AquaNova SARL{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container {
+        max-width: 500px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .login-logo {
+        max-height: 70px;
+        margin-bottom: 1rem;
+    }
+    
+    .login-title {
+        color: var(--primary);
+        font-weight: 600;
+    }
+    
+    .form-control {
+        border-radius: 8px;
+        padding: 10px 15px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 1rem;
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+    }
+    
+    .btn-login {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-weight: 600;
+        width: 100%;
+        margin-top: 1rem;
+    }
+    
+    .btn-login:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+    }
+    
+    .login-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+    }
+    
+    .login-footer a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .login-footer a:hover {
+        text-decoration: underline;
+    }
+    
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    
+    .error-text {
+        color: var(--danger);
+        font-size: 0.9rem;
+        margin-top: -0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .help-text {
+        color: var(--secondary);
+        font-size: 0.9rem;
+        margin-top: -0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .social-login {
+        text-align: center;
+        margin: 1.5rem 0;
+    }
+    
+    .social-login-divider {
+        display: flex;
+        align-items: center;
+        margin: 1.5rem 0;
+    }
+    
+    .social-login-divider:before,
+    .social-login-divider:after {
+        content: "";
+        flex: 1;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .social-login-divider span {
+        margin: 0 1rem;
+        color: var(--secondary);
+    }
+    
+    .btn-social {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin: 0 5px;
+        line-height: 40px;
+        text-align: center;
+        background-color: #f8f9fa;
+        color: #6c757d;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-social:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-facebook:hover {
+        background-color: #3b5998;
+        color: white;
+    }
+    
+    .btn-google:hover {
+        background-color: #db4437;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="login-container">
+        <div class="login-header">
+            <img src="{% static 'images/aquanova-logo.png' %}" alt="AquaNova SARL" class="login-logo" onerror="this.onerror=null; this.src='/api/placeholder/150/70'; this.alt='AquaNova';">
+            <h2 class="login-title">Connexion</h2>
+            <p class="text-muted">Accédez à votre compte pour gérer vos réservations</p>
+        </div>
+        
+        {% if form.errors %}
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-circle"></i> Identifiants incorrects. Veuillez réessayer.
+            </div>
+        {% endif %}
+        
+        <form method="post" class="login-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Nom d'utilisateur ou Email</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="error-text">{{ form.username.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}">Mot de passe</label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <div class="error-text">{{ form.password.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="remember-me" name="remember">
+                <label class="form-check-label" for="remember-me">
+                    Se souvenir de moi
+                </label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-login">
+                <i class="fas fa-sign-in-alt mr-2"></i> Se connecter
+            </button>
+            
+            <div class="text-center mt-3">
+                <a href="{% url 'password_reset' %}" class="text-primary">Mot de passe oublié ?</a>
+            </div>
+        </form>
+        
+        <div class="social-login-divider">
+            <span>ou connectez-vous avec</span>
+        </div>
+        
+        <div class="social-login">
+            <a href="#" class="btn-social btn-facebook">
+                <i class="fab fa-facebook-f"></i>
+            </a>
+            <a href="#" class="btn-social btn-google">
+                <i class="fab fa-google"></i>
+            </a>
+        </div>
+        
+        <div class="login-footer">
+            <p>Vous n'avez pas de compte ? <a href="{% url 'register' %}">Inscrivez-vous maintenant</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
