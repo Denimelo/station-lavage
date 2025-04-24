@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Liste des services</h2>
+<a href="{% url 'services:ajouter_service' %}" class="btn btn-success">Ajouter un service</a>
+<ul>
+  {% for service in services %}
+    <li>
+      {{ service.nom }} ({{ service.type_vehicule }}) - {{ service.prix }} FCFA
+      [<a href="{% url 'services:modifier_service' service.pk %}">modifier</a> |
+       <a href="{% url 'services:supprimer_service' service.pk %}">supprimer</a>]
+    </li>
+  {% empty %}
+    <li>Aucun service disponible.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

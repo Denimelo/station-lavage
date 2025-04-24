@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Inscription - AquaNova SARL{% endblock %}
+
+{% block extra_css %}
+<style>
+    .register-container {
+        max-width: 700px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .register-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .register-logo {
+        max-height: 70px;
+        margin-bottom: 1rem;
+    }
+    
+    .register-title {
+        color: var(--primary);
+        font-weight: 600;
+    }
+    
+    .form-control {
+        border-radius: 8px;
+        padding: 10px 15px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 1rem;
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+    }
+    
+    .btn-register {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-weight: 600;
+        width: 100%;
+        margin-top: 1rem;
+    }
+    
+    .btn-register:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+    }
+    
+    .register-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+    }
+    
+    .register-footer a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .register-footer a:hover {
+        text-decoration: underline;
+    }
+    
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    
+    .error-text {
+        color: var(--danger);
+        font-size: 0.9rem;
+        margin-top: -0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .help-text {
+        color: var(--secondary);
+        font-size: 0.85rem;
+        margin-top: -0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-step-indicator {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        position: relative;
+    }
+    
+    .form-step-indicator:before {
+        content: "";
+        position: absolute;
+        top: 15px;
+        left: 20px;
+        right: 20px;
+        height: 2px;
+        background-color: #e2e8f0;
+        z-index: 1;
+    }
+    
+    .step {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: white;
+        border: 2px solid #e2e8f0;
+        color: #6c757d;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .step.active {
+        background-color: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+    
+    .step.completed {
+        background-color: var(--success);
+        border-color: var(--success);
+        color: white;
+    }
+    
+    .step-label {
+        position: absolute;
+        top: 35px;
+        width: 100px;
+        text-align: center;
+        font-size: 0.85rem;
+        color: #6c757d;
+        transform: translateX(-35px);
+    }
+    
+    .privacy-terms {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 1rem;
+    }
+    
+    .benefit-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .benefit-icon {
+        color: var(--success);
+        margin-right: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="register-container">
+        <div class="register-header">
+            <img src="{% static 'images/aquanova-logo.png' %}" alt="AquaNova SARL" class="register-logo" onerror="this.onerror=null; this.src='/api/placeholder/150/70'; this.alt='AquaNova';">
+            <h2 class="register-title">Créer un compte client</h2>
+            <p class="text-muted">Rejoignez AquaNova et profitez de nos services de lavage</p>
+        </div>
+        
+        <div class="form-step-indicator">
+            <div class="step active">1
+                <span class="step-label">Informations personnelles</span>
+            </div>
+            <div class="step">2
+                <span class="step-label">Véhicule</span>
+            </div>
+            <div class="step">3
+                <span class="step-label">Confirmation</span>
+            </div>
+        </div>
+        
+        {% if form.errors %}
+            <div class="alert alert-danger" role="alert">
+                <i class="fas fa-exclamation-circle"></i> Veuillez corriger les erreurs ci-dessous.
+            </div>
+        {% endif %}
+        
+        <form method="post" class="register-form">
+            {% csrf_token %}
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.prenom.id_for_label }}">Prénom</label>
+                        {{ form.prenom }}
+                        {% if form.prenom.errors %}
+                            <div class="error-text">{{ form.prenom.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.nom.id_for_label }}">Nom</label>
+                        {{ form.nom }}
+                        {% if form.nom.errors %}
+                            <div class="error-text">{{ form.nom.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">Adresse email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="error-text">{{ form.email.errors }}</div>
+                {% endif %}
+                <div class="help-text">Nous ne partagerons jamais votre email avec des tiers.</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.telephone.id_for_label }}">Numéro de téléphone</label>
+                {{ form.telephone }}
+                {% if form.telephone.errors %}
+                    <div class="error-text">{{ form.telephone.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.password1.id_for_label }}">Mot de passe</label>
+                        {{ form.password1 }}
+                        {% if form.password1.errors %}
+                            <div class="error-text">{{ form.password1.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="{{ form.password2.id_for_label }}">Confirmation du mot de passe</label>
+                        {{ form.password2 }}
+                        {% if form.password2.errors %}
+                            <div class="error-text">{{ form.password2.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="help-text">Votre mot de passe doit contenir au moins 8 caractères, dont des lettres et des chiffres.</div>
+                </div>
+            </div>
+            
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="agree-terms" name="agree_terms" required>
+                <label class="form-check-label" for="agree-terms">
+                    J'accepte les <a href="#" class="text-primary">conditions d'utilisation</a> et la <a href="#" class="text-primary">politique de confidentialité</a>
+                </label>
+            </div>
+            
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="newsletter" name="newsletter">
+                <label class="form-check-label" for="newsletter">
+                    Je souhaite recevoir des promotions et des nouvelles par email
+                </label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-register">
+                <i class="fas fa-user-plus mr-2"></i> Créer mon compte
+            </button>
+            
+            <div class="privacy-terms text-center">
+                En créant un compte, vous acceptez nos conditions d'utilisation et notre politique de confidentialité.
+            </div>
+        </form>
+        
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">Avantages de l'inscription</h5>
+                        <div class="benefit-item">
+                            <i class="fas fa-check-circle benefit-icon"></i>
+                            <span>Réservation prioritaire</span>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="fas fa-check-circle benefit-icon"></i>
+                            <span>10% de réduction sur votre premier lavage</span>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="fas fa-check-circle benefit-icon"></i>
+                            <span>Programme de fidélité exclusif</span>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="fas fa-check-circle benefit-icon"></i>
+                            <span>Historique des services</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="register-footer">
+            <p>Vous avez déjà un compte ? <a href="{% url 'login' %}">Connectez-vous</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Script pour mettre en forme les champs dynamiquement
+    document.addEventListener('DOMContentLoaded', function() {
+        // Ajout des classes Bootstrap aux champs du formulaire
+        const inputs = document.querySelectorAll('input[type="text"], input[type="email"], input[type="password"], input[type="tel"]');
+        inputs.forEach(input => {
+            input.classList.add('form-control');
+        });
+    });
+</script>
+{% endblock %}

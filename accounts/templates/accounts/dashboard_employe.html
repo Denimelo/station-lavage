@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Espace employé - Bonjour {{ user.first_name }}</h1>
+<div class="dashboard">
+    <p><strong>Vos tâches :</strong></p>
+    <ul>
+        <li><a href="{% url 'reservations:reservations_employe' %}">Voir les réservations assignées</a></li>
+    </ul>
+</div>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Mes rendez-vous affectés</h2>
+<ul>
+    {% for reservation in reservations %}
+        <li>
+            {{ reservation.client.get_full_name }} - {{ reservation.service.nom }} - {{ reservation.date_heure|date:"d/m/Y H:i" }} - {{ reservation.get_statut_display }}
+        </li>
+    {% empty %}
+        <li>Aucun rendez-vous ne vous est encore affecté.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Assigner un employé</h2>
+<p>Réservation de {{ reservation.client.get_full_name }} pour le {{ reservation.date_heure|date:"d/m/Y H:i" }}</p>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Assigner</button>
+</form>
+<a href="{% url 'reservations:reservations_gestionnaire' %}">Retour</a>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Espace gestionnaire - Bienvenue {{ user.first_name }}</h1>
+<div class="dashboard">
+    <p><strong>Actions de gestion :</strong></p>
+    <ul>
+        <li><a href="{% url 'reservations:reservations_gestionnaire' %}">Gérer toutes les réservations</a></li>
+        <li><a href="{% url 'services:liste_services' %}">Voir les services</a></li>
+        <li><a href="{% url 'personnel:liste_employes' %}">Gérer les employés</a></li>
+        <li><a href="{% url 'statistiques:dashboard' %}">Voir les statistiques</a></li>
+    </ul>
+</div>
+{% endblock %}

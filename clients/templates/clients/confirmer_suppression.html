@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Supprimer le véhicule</h2>
+  <p>Êtes-vous sûr de vouloir supprimer : {{ vehicule }} ?</p>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+    <a href="{% url 'clients:liste_vehicules' %}" class="btn btn-secondary">Annuler</a>
+  </form>
+{% endblock %}

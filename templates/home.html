@@ -1,0 +1,488 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Accueil - AquaNova SARL{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --accent: #06b6d4;
+        --light: #f0f9ff;
+        --dark: #0f172a;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+    }
+
+    .hero-section {
+        background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.9)), 
+                    url('{% static "images/car-wash-bg.jpg" %}') no-repeat center center;
+        background-size: cover;
+        color: white;
+        padding: 100px 0;
+        text-align: center;
+        margin-bottom: 2rem;
+        border-radius: 0 0 30px 30px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .hero-title {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .hero-subtitle {
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+        font-weight: 300;
+    }
+
+    .cta-button {
+        display: inline-block;
+        background-color: var(--primary);
+        color: white;
+        padding: 12px 30px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        margin: 0 10px;
+        box-shadow: 0 4px 6px rgba(37, 99, 235, 0.25);
+    }
+
+    .cta-button:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .cta-button.secondary {
+        background-color: transparent;
+        border: 2px solid white;
+    }
+
+    .cta-button.secondary:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .features-section {
+        padding: 3rem 0;
+    }
+
+    .feature-card {
+        background-color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        text-align: center;
+        height: 100%;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 1.5rem;
+        color: var(--primary);
+    }
+
+    .services-section {
+        background-color: var(--light);
+        padding: 4rem 0;
+        border-radius: 30px;
+        margin: 2rem 0;
+    }
+
+    .service-card {
+        background-color: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        height: 100%;
+    }
+
+    .service-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .service-icon {
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--light);
+        color: var(--primary);
+        font-size: 2rem;
+        border-radius: 50%;
+        margin: 0 auto 1.5rem;
+    }
+
+    .testimonial-section {
+        padding: 4rem 0;
+    }
+
+    .testimonial-card {
+        background-color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .testimonial-card::before {
+        content: '"';
+        position: absolute;
+        top: 10px;
+        left: 20px;
+        font-size: 5rem;
+        color: rgba(37, 99, 235, 0.1);
+        font-family: Georgia, serif;
+    }
+
+    .testimonial-author {
+        display: flex;
+        align-items: center;
+        margin-top: 1rem;
+    }
+
+    .testimonial-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 1rem;
+        background-color: var(--light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary);
+        font-weight: bold;
+    }
+
+    .cta-section {
+        background: linear-gradient(to right, var(--primary), var(--accent));
+        color: white;
+        padding: 4rem 0;
+        text-align: center;
+        border-radius: 30px;
+        margin: 2rem 0;
+    }
+
+    .dashboard-preview {
+        background-color: var(--light);
+        padding: 2rem;
+        border-radius: 15px;
+        margin-top: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .dashboard-card {
+        background-color: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .status-indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 5px;
+    }
+
+    .status-scheduled {
+        background-color: var(--warning);
+    }
+
+    .status-in-progress {
+        background-color: var(--accent);
+    }
+
+    .status-completed {
+        background-color: var(--success);
+    }
+
+    .status-cancelled {
+        background-color: var(--danger);
+    }
+
+    .company-logo {
+        max-height: 80px;
+        margin-bottom: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+        }
+
+        .cta-button {
+            display: block;
+            margin: 10px auto;
+            max-width: 80%;
+        }
+        
+        .company-logo {
+            max-height: 60px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <img src="{% static 'images/aquanova-logo.png' %}" alt="AquaNova SARL Logo" class="company-logo" onerror="this.onerror=null; this.src='/api/placeholder/150/80'; this.alt='AquaNova SARL';">
+            <h1 class="hero-title">AquaNova SARL</h1>
+            <p class="hero-subtitle">La solution complète pour la gestion de votre station de lavage automobile</p>
+            
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}" class="cta-button">Accéder à mon tableau de bord</a>
+                {% if user.role == 'client' %}
+                    <a href="{% url 'reservations:create' %}" class="cta-button secondary">Réserver un lavage</a>
+                {% endif %}
+            {% else %}
+                <a href="{% url 'register' %}" class="cta-button">Créer un compte</a>
+                <a href="{% url 'login' %}" class="cta-button secondary">Se connecter</a>
+            {% endif %}
+        </div>
+    </section>
+
+    {% if user.is_authenticated %}
+        <!-- Dashboard Preview Section -->
+        <section class="container">
+            <div class="row">
+                <div class="col-md-8 offset-md-2">
+                    <div class="dashboard-preview">
+                        <h3>Bonjour {{ user.prenom }} {{ user.nom }} 👋</h3>
+                        <p>Vous êtes connecté en tant que <strong>{{ user.get_role_display }}</strong></p>
+                        
+                        {% if user.role == 'client' %}
+                            <h4 class="mt-4">Vos prochains rendez-vous</h4>
+                            <div class="dashboard-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="status-indicator status-scheduled"></span>
+                                        <strong>Lavage extérieur premium</strong>
+                                        <p class="mb-0 text-muted">25 avril 2025 à 14:30</p>
+                                    </div>
+                                    <a href="#" class="btn btn-sm btn-outline-primary">Détails</a>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <a href="{% url 'reservations:create' %}" class="btn btn-primary">Réserver un nouveau lavage</a>
+                                <a href="{% url 'dashboard' %}" class="btn btn-outline-primary ms-2">Voir tout</a>
+                            </div>
+                        {% elif user.role == 'employe' %}
+                            <h4 class="mt-4">Vos tâches du jour</h4>
+                            <div class="dashboard-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="status-indicator status-in-progress"></span>
+                                        <strong>Lavage complet - BMW X5</strong>
+                                        <p class="mb-0 text-muted">Aujourd'hui à 15:00</p>
+                                    </div>
+                                    <a href="#" class="btn btn-sm btn-outline-primary">Détails</a>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <a href="{% url 'dashboard' %}" class="btn btn-primary">Accéder au planning</a>
+                            </div>
+                        {% elif user.role == 'gestionnaire' %}
+                            <h4 class="mt-4">Aperçu de l'activité</h4>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="dashboard-card text-center">
+                                        <h3>12</h3>
+                                        <p class="text-muted mb-0">Rendez-vous aujourd'hui</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="dashboard-card text-center">
+                                        <h3>4</h3>
+                                        <p class="text-muted mb-0">Employés actifs</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="dashboard-card text-center">
+                                        <h3>475 000 FCFA</h3>
+                                        <p class="text-muted mb-0">CA du jour</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <a href="{% url 'dashboard' %}" class="btn btn-primary">Accéder aux statistiques</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </section>
+    {% else %}
+        <!-- Features Section -->
+        <section class="features-section">
+            <div class="container">
+                <h2 class="text-center mb-5">Pourquoi choisir notre application</h2>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <h3>Réservation facilitée</h3>
+                            <p>Prenez rendez-vous en quelques clics et gérez vos visites depuis votre smartphone.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <h3>Programme fidélité</h3>
+                            <p>Cumulez des points à chaque visite et bénéficiez de remises et d'avantages exclusifs.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <h3>Notifications</h3>
+                            <p>Recevez des rappels avant vos rendez-vous et suivez l'état de votre véhicule en temps réel.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section class="services-section">
+            <div class="container">
+                <h2 class="text-center mb-5">Nos services de lavage</h2>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <i class="fas fa-car-side"></i>
+                            </div>
+                            <h4>Lavage extérieur</h4>
+                            <p>Nettoyage complet de la carrosserie, des jantes et des vitres.</p>
+                            <p class="text-primary fw-bold">À partir de 7 500 FCFA</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <i class="fas fa-couch"></i>
+                            </div>
+                            <h4>Lavage intérieur</h4>
+                            <p>Nettoyage des sièges, tapis et surfaces intérieures.</p>
+                            <p class="text-primary fw-bold">À partir de 12 500 FCFA</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <i class="fas fa-spray-can"></i>
+                            </div>
+                            <h4>Polish & Cire</h4>
+                            <p>Traitement brillance et protection longue durée.</p>
+                            <p class="text-primary fw-bold">À partir de 20 000 FCFA</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="service-card">
+                            <div class="service-icon">
+                                <i class="fas fa-check-double"></i>
+                            </div>
+                            <h4>Formule complète</h4>
+                            <p>Combinaison de tous nos services premium.</p>
+                            <p class="text-primary fw-bold">À partir de 35 000 FCFA</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section class="testimonial-section">
+            <div class="container">
+                <h2 class="text-center mb-5">Ce que disent nos clients</h2>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="testimonial-card">
+                            <p>"Service impeccable ! J'ai pu réserver facilement et mon véhicule a été traité avec soin. Je recommande vivement."</p>
+                            <div class="testimonial-author">
+                                <div class="testimonial-avatar">ML</div>
+                                <div>
+                                    <strong>Marie L.</strong>
+                                    <p class="text-muted mb-0">Cliente depuis 6 mois</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="testimonial-card">
+                            <p>"L'application est très intuitive et me permet de suivre l'historique de mes entretiens. Le programme de fidélité est un vrai plus !"</p>
+                            <div class="testimonial-author">
+                                <div class="testimonial-avatar">TD</div>
+                                <div>
+                                    <strong>Thomas D.</strong>
+                                    <p class="text-muted mb-0">Client depuis 1 an</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="testimonial-card">
+                            <p>"En tant que gestionnaire de flotte, cette application m'a permis d'optimiser la gestion de l'entretien de nos véhicules d'entreprise."</p>
+                            <div class="testimonial-author">
+                                <div class="testimonial-avatar">SB</div>
+                                <div>
+                                    <strong>Sophie B.</strong>
+                                    <p class="text-muted mb-0">Cliente professionnelle</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Call to Action Section -->
+        <section class="cta-section">
+            <div class="container">
+                <h2 class="mb-4">Prêt à améliorer votre expérience de lavage auto ?</h2>
+                <p class="mb-4">Inscrivez-vous dès maintenant et bénéficiez de 10% de réduction sur votre premier lavage !</p>
+                <a href="{% url 'register' %}" class="cta-button">Créer mon compte</a>
+            </div>
+        </section>
+    {% endif %}
+
+    <!-- Add Font Awesome for icons -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+{% endblock %}

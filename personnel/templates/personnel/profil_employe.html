@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Profil de l'employé</h2>
+<p><strong>Nom :</strong> {{ employe.user.prenom }} {{ employe.user.nom }}</p>
+<p><strong>Email :</strong> {{ employe.user.email }}</p>
+<p><strong>Poste :</strong> {{ employe.poste }}</p>
+{% endblock %}
