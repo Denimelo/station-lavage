@@ -4,8 +4,9 @@ from . import views
 app_name = 'clients'
 
 urlpatterns = [
-    path('mes-vehicules/', views.mes_vehicules, name='liste_vehicules'),
-    path('ajouter/', views.ajouter_vehicule, name='ajouter_vehicule'),
-    path('modifier/<int:pk>/', views.modifier_vehicule, name='modifier_vehicule'),
-    path('supprimer/<int:pk>/', views.supprimer_vehicule, name='supprimer_vehicule'),
+    path('vehicules/', views.liste_vehicules, name='vehicules'),
+    path('vehicule/ajouter/', views.ajouter_vehicule, name='ajouter_vehicule'),
+    path('vehicule/<str:plaque>/modifier/', views.modifier_vehicule, name='modifier_vehicule'),
+    path('vehicule/<str:plaque>/supprimer/', views.supprimer_vehicule, name='supprimer_vehicule'),
+    path('vehicule/<str:plaque>/', views.details_vehicule, name='details_vehicule'),
 ]

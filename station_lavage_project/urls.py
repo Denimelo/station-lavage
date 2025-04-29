@@ -4,6 +4,8 @@ from django.contrib.auth import views as auth_views
 from django.urls import path, include
 from django.http import HttpResponse
 from station_lavage_project.views import home
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 urlpatterns = [
@@ -25,14 +27,11 @@ urlpatterns = [
     path('accounts/reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('accounts/reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 
-
-    # 🔽 Dashboards de test pour les rôles
-    path('client/dashboard/', lambda request: HttpResponse("Bienvenue dans le tableau de bord CLIENT"), name='dashboard_client'),
-    path('employe/dashboard/', lambda request: HttpResponse("Bienvenue dans le tableau de bord EMPLOYÉ"), name='dashboard_employe'),
-    path('gestionnaire/dashboard/', lambda request: HttpResponse("Bienvenue dans le tableau de bord GESTIONNAIRE"), name='dashboard_gestionnaire'),
-
     # Page d'accueil
     path('', home, name='home'),
 
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

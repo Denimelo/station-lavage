@@ -54,3 +54,7 @@ def profile_view(request):
 @login_required
 def dashboard(request):
     return HttpResponse("Bienvenue dans votre tableau de bord.")
+
+@login_required
+def dashboard_client(request):
+    return render(request, 'accounts/dashboard_client.html')
