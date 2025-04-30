@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Détail de la réservation #{{ reservation.id }}</h2>
+
+<div class="card p-3 shadow-sm">
+  <p><strong>Client :</strong> {{ reservation.client.prenom }} {{ reservation.client.nom }}</p>
+  <p><strong>Véhicule :</strong> {{ reservation.vehicule.marque }} {{ reservation.vehicule.modele }} ({{ reservation.vehicule.plaque_immatric }})</p>
+  <p><strong>Service :</strong> {{ reservation.service.nom }} — {{ reservation.service.prix|floatformat:0 }} F CFA</p>
+  <p><strong>Créneau :</strong> {{ reservation.heure_debut|date:"d/m/Y H:i" }} → {{ reservation.heure_fin|date:"H:i" }}</p>
+  <p><strong>Statut :</strong>
+    <span class="badge 
+      {% if reservation.statut == 'terminee' %}bg-success
+      {% elif reservation.statut == 'en_cours' %}bg-warning
+      {% elif reservation.statut == 'assignee' %}bg-info text-dark
+      {% elif reservation.statut == 'annulee' %}bg-danger
+      {% else %}bg-secondary{% endif %}">
+      {{ reservation.get_statut_display }}
+    </span>
+  </p>
+
+  <a href="{% url 'reservations:reservations_employe' %}" class="btn btn-outline-secondary mt-3">← Retour</a>
+</div>
+{% endblock %}

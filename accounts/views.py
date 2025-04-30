@@ -69,3 +69,7 @@ def dashboard_gestionnaire(request):
     return render(request, 'accounts/dashboard_gestionnaire.html', {
         'services': services
     })
+
+@login_required
+def dashboard_employe(request):
+    return render(request, 'accounts/dashboard_employe.html')

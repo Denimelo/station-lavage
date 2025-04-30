@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import Service
 from .forms import ServiceForm
-from datetime import timedelta
 from reservations.models import Reservation
+from services.models import Service
 
 def is_gestionnaire(user):
     return user.is_authenticated and user.role == 'gestionnaire'
@@ -60,3 +60,4 @@ def supprimer_service(request, id):
         return redirect('services:liste_services')
 
     return render(request, 'services/confirmer_suppression.html', {'service': service})
+

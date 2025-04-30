@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Évaluer le service</h2>
+
+<p><strong>Véhicule :</strong> {{ reservation.vehicule.marque }} {{ reservation.vehicule.modele }}</p>
+<p><strong>Service :</strong> {{ reservation.service.nom }}</p>
+
+<form method="POST">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="btn btn-success">Soumettre l’évaluation</button>
+</form>
+
+<a href="{% url 'reservations:suivi_reservation' reservation.id %}" class="btn btn-outline-secondary mt-3">Annuler</a>
+{% endblock %}

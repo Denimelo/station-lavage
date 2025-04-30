@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Mon planning</h2>
+<div id="calendar"></div>
+{% endblock %}
+
+{% block extra_js %}
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const calendarEl = document.getElementById('calendar');
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'timeGridDay,timeGridWeek'
+        },
+        locale: 'fr',
+        events: "{% url 'reservations:api_planning_employe' %}",
+        height: 'auto',
+        slotMinTime: "07:00:00",
+        slotMaxTime: "20:00:00",
+        nowIndicator: true,
+        eventClick: function (info) {
+          if (info.event.url) {
+            window.location.href = info.event.url;
+            info.jsEvent.preventDefault();
+          }
+        }
+      });
+      calendar.render();
+    });
+  </script>
+{% endblock %}

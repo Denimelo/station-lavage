@@ -26,10 +26,25 @@ def create_default_users():
             email=employe_email,
             password='employe123',
             nom='Employé',
-            prenom='Démo',
+            prenom='Joseph',
             telephone='902345678',
             role='employe'
         )
         print(f"✔ Employé créé : {employe_email} / employe123")
     else:
         print(f"ℹ Employé déjà existant : {employe_email}")
+
+    # Client
+    client_email = 'client@example.com'
+    if not User.objects.filter(email=client_email).exists():
+        User.objects.create_user(
+            email=client_email,
+            password='client123',
+            nom='Client',
+            prenom='Narcisse',
+            telephone='902345678',
+            role='client'
+        )
+        print(f"✔ Client créé : {client_email} / client123")
+    else:
+        print(f"ℹ Client déjà existant : {client_email}")
