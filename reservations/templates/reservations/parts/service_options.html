@@ -1,0 +1,6 @@
+<select name="service" id="service-options" class="form-select">
+    <option value="">--- Choisissez un service ---</option>
+    {% for service in services %}
+      <option value="{{ service.id }}">{{ service.nom }} - {{ service.prix }}€</option>
+    {% endfor %}
+  </select>

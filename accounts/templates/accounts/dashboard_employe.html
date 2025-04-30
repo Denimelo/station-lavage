@@ -4,7 +4,11 @@
 <div class="dashboard">
     <p><strong>Vos tâches :</strong></p>
     <ul>
-        <li><a href="{% url 'reservations:reservations_employe' %}">Voir les réservations assignées</a></li>
+        <li>
+            <a href="{% url 'reservations:reservations_employe' %}" class="btn btn-outline-primary">📋 Mes réservations</a>
+            <a href="{% url 'reservations:emploi_temps' %}" class="btn btn-outline-info">🗓️ Mon planning</a>
+
+        </li>
     </ul>
 </div>
 {% endblock %}
