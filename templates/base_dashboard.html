@@ -1,0 +1,711 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    {% if user.role == 'gestionnaire' %}
+        Tableau de bord Gestionnaire | AquaNova SARL
+    {% elif user.role == 'employe' %}
+        Tableau de bord Employé | AquaNova SARL
+    {% elif user.role == 'client' %}
+        Tableau de bord Client | AquaNova SARL
+    {% else %}
+        Tableau de bord | AquaNova SARL
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+    <!-- Chart.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/dataTables.bootstrap4.min.css">
+    <style>
+        .dashboard-container {
+            padding: 20px 0;
+        }
+        
+        .dashboard-card {
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background-color: white;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .dashboard-card-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dashboard-card-header h5 {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .dashboard-card-body {
+            padding: 20px;
+        }
+        
+        .stats-card {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .stats-card i {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        
+        .stats-card .stats-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stats-card .stats-label {
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+        
+        .sidebar {
+            height: 100%;
+            background-color: var(--dark);
+            color: white;
+            padding-top: 20px;
+        }
+        
+        .sidebar-sticky {
+            position: sticky;
+            top: 0;
+            height: calc(100vh - 0px);
+            padding-top: 0.5rem;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.75);
+            padding: 10px 15px;
+            margin: 3px 0;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar .nav-link:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: var(--primary);
+        }
+        
+        .sidebar .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .dashboard-content {
+            padding: 20px;
+        }
+        
+        .user-welcome {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        
+        .recent-activity {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .activity-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-time {
+            font-size: 0.8rem;
+            color: var(--secondary);
+        }
+        
+        .activity-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+        
+        .status-pending {
+            background-color: var(--warning);
+        }
+        
+        .status-completed {
+            background-color: var(--success);
+        }
+        
+        .status-cancelled {
+            background-color: var(--danger);
+        }
+        
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 3px 8px;
+        }
+        
+        /* Animation pour le chargement des cartes */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+        
+        /* Classes pour les différents délais d'animation */
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+        
+        /* Responsive styles */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                position: static;
+                height: auto;
+                padding-bottom: 20px;
+            }
+            
+            .sidebar-sticky {
+                height: auto;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar">
+            <div class="sidebar-sticky">
+                <h5 class="px-3 mt-4 mb-3 text-white-50 text-uppercase">
+                    <i class="fas fa-tachometer-alt mr-2"></i> Dashboard
+                </h5>
+                <ul class="nav flex-column">                 
+                    {% if user.role == 'gestionnaire' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-users"></i> Clients
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-user-tie"></i> Employés
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-car-wash"></i> Services
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-calendar-alt"></i> Réservations
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-chart-line"></i> Rapports
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-cog"></i> Paramètres
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if user.role == 'employe' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-tasks"></i> Mes tâches
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-calendar-alt"></i> Planning
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-check-circle"></i> Services effectués
+                        </a>
+                    </li>
+                    {% endif %}
+                    
+                    {% if user.role == 'client' %}
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'dashboard_client' %}">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'clients:vehicules' %}">
+                            <i class="fas fa-calendar-check"></i> Mes vehicules
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'clients:ajouter_vehicule' %}">
+                            <i class="fas fa-history"></i> Ajouter un véhicule
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'reservations:list' %}">
+                            <i class="fas fa-calendar-check"></i> Mes réservations
+                        </a>
+                    </li>
+
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-history"></i> Historique des services
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-plus-circle"></i> Prendre rendez-vous
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-award"></i> Programme de fidélité
+                        </a>
+                    </li> {% endcomment %}
+                    {% endif %}
+                    
+                    <li class="nav-item mt-4">
+                        <a class="nav-link" href="{% url 'profile' %}">
+                            <i class="fas fa-user-circle"></i> Mon profil
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">
+                            <i class="fas fa-sign-out-alt"></i> Déconnexion
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 dashboard-content">
+            <!-- Welcome section -->
+            <div class="user-welcome animate-fadeInUp">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h2 class="mb-1">Bienvenue, {{ user.prenom }} {{ user.nom }}</h2>
+                        <p class="mb-0">{{ now|date:"l j F Y" }} | Dernière connexion: {{ user.last_login|date:"j F Y à H:i" }}</p>
+                    </div>
+                    <div class="col-md-4 text-md-right">
+                        <div class="btn-group">
+                            {% if user.role == 'gestionnaire' %}
+                            <a href="{% url 'create_service' %}" class="btn btn-light">
+                                <i class="fas fa-plus-circle"></i> Nouveau service
+                            </a>
+                            {% elif user.role == 'employe' %}
+                            <a href="{% url 'taches_disponibles' %}" class="btn btn-light">
+                                <i class="fas fa-clipboard-list"></i> Tâches disponibles
+                            </a>
+                            {% elif user.role == 'client' %}
+                            <a href="#" class="btn btn-light">
+                                <i class="fas fa-calendar-plus"></i> Nouveau rendez-vous
+                            </a> {% endcomment %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% block dashboard_content %}
+            <!-- Statistics cards -->
+            <div class="row">
+                <!-- Card 1 -->
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="dashboard-card stats-card animate-fadeInUp delay-1">
+                        <i class="fas fa-calendar-check"></i>
+                        <div class="stats-value">{{ stats.total_reservations }}</div>
+                        <div class="stats-label">Réservations totales</div>
+                    </div>
+                </div>
+                
+                <!-- Card 2 -->
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="dashboard-card stats-card animate-fadeInUp delay-2">
+                        <i class="fas fa-car"></i>
+                        <div class="stats-value">{{ stats.services_today }}</div>
+                        <div class="stats-label">Services aujourd'hui</div>
+                    </div>
+                </div>
+                
+                <!-- Card 3 -->
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="dashboard-card stats-card animate-fadeInUp delay-3">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <div class="stats-value">{{ stats.revenue_today }} FCFA</div>
+                        <div class="stats-label">Revenus du jour</div>
+                    </div>
+                </div>
+                
+                <!-- Card 4 -->
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="dashboard-card stats-card animate-fadeInUp delay-4">
+                        <i class="fas fa-users"></i>
+                        <div class="stats-value">{{ stats.total_clients }}</div>
+                        <div class="stats-label">Clients enregistrés</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Charts -->
+            <div class="row">
+                <!-- Chart 1: Services par jour -->
+                <div class="col-lg-8 mb-4">
+                    <div class="dashboard-card animate-fadeInUp delay-1">
+                        <div class="dashboard-card-header">
+                            <h5>Services par jour (7 derniers jours)</h5>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-secondary">Semaine</button>
+                                <button type="button" class="btn btn-outline-secondary">Mois</button>
+                                <button type="button" class="btn btn-outline-secondary">Année</button>
+                            </div>
+                        </div>
+                        <div class="dashboard-card-body">
+                            <div class="chart-container">
+                                <canvas id="servicesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chart 2: Services par catégorie -->
+                <div class="col-lg-4 mb-4">
+                    <div class="dashboard-card animate-fadeInUp delay-2">
+                        <div class="dashboard-card-header">
+                            <h5>Répartition des services</h5>
+                        </div>
+                        <div class="dashboard-card-body">
+                            <div class="chart-container">
+                                <canvas id="serviceTypesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Second row of charts -->
+            <div class="row">
+                <!-- Chart 3: Revenus par mois -->
+                <div class="col-lg-6 mb-4">
+                    <div class="dashboard-card animate-fadeInUp delay-3">
+                        <div class="dashboard-card-header">
+                            <h5>Revenus mensuels</h5>
+                        </div>
+                        <div class="dashboard-card-body">
+                            <div class="chart-container">
+                                <canvas id="revenueChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chart 4: Performance des employés -->
+                <div class="col-lg-6 mb-4">
+                    <div class="dashboard-card animate-fadeInUp delay-4">
+                        <div class="dashboard-card-header">
+                            <h5>Performance des employés</h5>
+                        </div>
+                        <div class="dashboard-card-body">
+                            <div class="chart-container">
+                                <canvas id="employeePerformanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tables & Lists -->
+            <div class="row">
+                <!-- Recent reservations -->
+                <div class="col-lg-6 mb-4">
+                    <div class="dashboard-card animate-fadeInUp delay-1">
+                        <div class="dashboard-card-header">
+                            <h5>Réservations récentes</h5>
+                            <a href="{% url 'reservations_list' %}" class="btn btn-sm btn-primary">Voir tout</a>
+                        </div>
+                        <div class="dashboard-card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Client</th>
+                                            <th>Service</th>
+                                            <th>Date</th>
+                                            <th>Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for reservation in recent_reservations %}
+                                        <tr>
+                                            <td>{{ reservation.client.prenom }} {{ reservation.client.nom }}</td>
+                                            <td>{{ reservation.service.nom }}</td>
+                                            <td>{{ reservation.date_heure|date:"d/m/Y H:i" }}</td>
+                                            <td>
+                                                {% if reservation.statut == 'en_attente' %}
+                                                <span class="badge badge-warning status-badge">En attente</span>
+                                                {% elif reservation.statut == 'confirme' %}
+                                                <span class="badge badge-info status-badge">Confirmé</span>
+                                                {% elif reservation.statut == 'en_cours' %}
+                                                <span class="badge badge-primary status-badge">En cours</span>
+                                                {% elif reservation.statut == 'termine' %}
+                                                <span class="badge badge-success status-badge">Terminé</span>
+                                                {% elif reservation.statut == 'annule' %}
+                                                <span class="badge badge-danger status-badge">Annulé</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="4" class="text-center">Aucune réservation récente</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent activity -->
+                <div class="col-lg-6 mb-4">
+                    <div class="dashboard-card animate-fadeInUp delay-2">
+                        <div class="dashboard-card-header">
+                            <h5>Activité récente</h5>
+                        </div>
+                        <div class="dashboard-card-body">
+                            <div class="recent-activity">
+                                {% for activity in recent_activity %}
+                                <div class="activity-item d-flex align-items-center">
+                                    <div class="activity-icon 
+                                        {% if activity.type == 'reservation' %}bg-primary
+                                        {% elif activity.type == 'service' %}bg-success
+                                        {% elif activity.type == 'client' %}bg-info
+                                        {% elif activity.type == 'employe' %}bg-warning
+                                        {% elif activity.type == 'paiement' %}bg-dark
+                                        {% else %}bg-secondary{% endif %} text-white">
+                                        <i class="fas 
+                                            {% if activity.type == 'reservation' %}fa-calendar-plus
+                                            {% elif activity.type == 'service' %}fa-car-wash
+                                            {% elif activity.type == 'client' %}fa-user-plus
+                                            {% elif activity.type == 'employe' %}fa-user-tie
+                                            {% elif activity.type == 'paiement' %}fa-money-bill
+                                            {% else %}fa-bell{% endif %}"></i>
+                                    </div>
+                                    <div class="ml-3 flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <strong>{{ activity.titre }}</strong>
+                                            <span class="activity-time">{{ activity.date|date:"H:i" }}</span>
+                                        </div>
+                                        <p class="mb-0">{{ activity.description }}</p>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="text-center py-3">
+                                    <p>Aucune activité récente</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endblock %}
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+<!-- DataTables -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+
+<script>
+    // Initialiser DataTables
+    $(document).ready(function() {
+        $('.datatable').DataTable({
+            language: {
+                url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/French.json"
+            }
+        });
+    });
+    
+    // Graphique des services par jour
+    var servicesCtx = document.getElementById('servicesChart').getContext('2d');
+    var servicesChart = new Chart(servicesCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_data.services_labels|safe }},
+            datasets: [{
+                label: 'Nombre de services',
+                data: {{ chart_data.services_data|safe }},
+                backgroundColor: 'rgba(37, 99, 235, 0.8)',
+                borderColor: 'rgba(37, 99, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+    
+    // Graphique des types de services
+    var typesCtx = document.getElementById('serviceTypesChart').getContext('2d');
+    var typesChart = new Chart(typesCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ chart_data.types_labels|safe }},
+            datasets: [{
+                data: {{ chart_data.types_data|safe }},
+                backgroundColor: [
+                    'rgba(37, 99, 235, 0.8)',
+                    'rgba(6, 182, 212, 0.8)',
+                    'rgba(16, 185, 129, 0.8)',
+                    'rgba(245, 158, 11, 0.8)',
+                    'rgba(239, 68, 68, 0.8)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            legend: {
+                position: 'bottom'
+            }
+        }
+    });
+    
+    // Graphique des revenus mensuels
+    var revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    var revenueChart = new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_data.revenue_labels|safe }},
+            datasets: [{
+                label: 'Revenus (FCFA)',
+                data: {{ chart_data.revenue_data|safe }},
+                backgroundColor: 'rgba(6, 182, 212, 0.2)',
+                borderColor: 'rgba(6, 182, 212, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(6, 182, 212, 1)',
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                        callback: function(value) {
+                            return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' FCFA';
+                        }
+                    }
+                }]
+            },
+            tooltips: {
+                callbacks: {
+                    label: function(tooltipItem, data) {
+                        return tooltipItem.yLabel.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' FCFA';
+                    }
+                }
+            }
+        }
+    });
+    
+    // Graphique de performance des employés
+    var employeeCtx = document.getElementById('employeePerformanceChart').getContext('2d');
+    var employeeChart = new Chart(employeeCtx, {
+        type: 'horizontalBar',
+        data: {
+            labels: {{ chart_data.employee_labels|safe }},
+            datasets: [{
+                label: 'Services effectués',
+                data: {{ chart_data.employee_data|safe }},
+                backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                borderColor: 'rgba(16, 185, 129, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                xAxes: [{
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+</script>
+{% endblock %}
