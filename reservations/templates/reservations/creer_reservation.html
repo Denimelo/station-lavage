@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Nouvelle réservation</h2>
+<form method="POST">
+    {% csrf_token %}
+  
+    <!-- Sélection du véhicule -->
+    <label for="id_vehicule">Véhicule</label>
+    <select name="vehicule" id="id_vehicule" class="form-select"
+          hx-get="{% url 'reservations:api_services_by_type_htmx' %}"
+          hx-target="#service-options"
+          hx-trigger="change"
+          hx-swap="outerHTML"
+          hx-include="[name=vehicule]">
+    {% for vehicule in form.fields.vehicule.queryset %}
+      <option value="{{ vehicule.id }}">{{ vehicule.marque }} {{ vehicule.modele }} ({{ vehicule.plaque_immatric }})</option>
+    {% endfor %}
+  </select>
+  
+    <!-- Sélection du service (sera mis à jour dynamiquement) -->
+    <label for="id_service">Service</label>
+    <select name="service" id="service-options" class="form-select">
+      <option value="">--- Choisissez un service ---</option>
+    </select>
+  
+    {{ form.heure_debut.label_tag }} {{ form.heure_debut }}
+    {{ form.heure_fin.label_tag }} {{ form.heure_fin }}
+
+  
+    <button type="submit" class="btn btn-success mt-3">Réserver</button>
+  </form>
+{% endblock %}

@@ -6,8 +6,8 @@ class ServiceForm(forms.ModelForm):
         model = Service
         fields = ['nom', 'type_vehicule', 'prix', 'duree_estimee']
         widgets = {
-            'nom': forms.TextInput(attrs={'class': 'form-control'}),
+            'nom': forms.Select(attrs={'class': 'form-select'}),
             'type_vehicule': forms.Select(attrs={'class': 'form-select'}),
-            'prix': forms.NumberInput(attrs={'step': '50','min': '0', 'class': 'form-control', 'placeholder': 'Ex : 1500 F CFA'}),
-            'duree_estimee': forms.TextInput(attrs={'placeholder': 'HH:MM:SS', 'class': 'form-control'}),
+            'prix': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+            'duree_estimee': forms.Select(attrs={'class': 'form-select'}),
         }

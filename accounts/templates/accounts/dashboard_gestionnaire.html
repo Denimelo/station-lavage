@@ -3,17 +3,10 @@
   <h2>Tableau de bord Gestionnaire</h2>
 
   <h4>Services disponibles</h4>
-  <a href="{% url 'services:ajouter_service' %}" class="btn btn-success mb-3">➕ Ajouter un service</a>
+  <a href="{% url 'services:liste_services' %}" class="btn btn-success mb-3">liste des services</a>
+  <a href="{% url 'reservations:liste_reservations_gestionnaire' %}" class="btn btn-outline-secondary">
+    📋 Réservations à traiter
+  </a>
+  
 
-  <ul>
-    {% for service in services %}
-      <li>
-        {{ service.nom }} ({{ service.get_type_vehicule_display }}) - {{ service.prix|floatformat:0 }} F CFA
-        • <a href="{% url 'services:modifier_service' service.id %}">Modifier</a>
-        • <a href="{% url 'services:supprimer_service' service.id %}">Supprimer</a>
-      </li>
-    {% empty %}
-      <li>Aucun service enregistré pour le moment.</li>
-    {% endfor %}
-  </ul>
 {% endblock %}

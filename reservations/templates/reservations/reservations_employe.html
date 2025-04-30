@@ -1,13 +1,29 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Mes rendez-vous affectés</h2>
-<ul>
-    {% for reservation in reservations %}
-        <li>
-            {{ reservation.client.get_full_name }} - {{ reservation.service.nom }} - {{ reservation.date_heure|date:"d/m/Y H:i" }} - {{ reservation.get_statut_display }}
-        </li>
-    {% empty %}
-        <li>Aucun rendez-vous ne vous est encore affecté.</li>
+<h2>Réservations assignées</h2>
+
+{% if reservations %}
+  <ul class="list-group">
+    {% for r in reservations %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <strong>{{ r.client.prenom }} {{ r.client.nom }}</strong> – {{ r.service.nom }}<br>
+          {{ r.vehicule.marque }} {{ r.vehicule.modele }} ({{ r.vehicule.plaque_immatric }})<br>
+          Créneau : {{ r.heure_debut|date:"d/m/Y H:i" }} → {{ r.heure_fin|date:"H:i" }}
+        </div>
+        <div>
+          {% if r.statut == 'assignee' %}
+            <a href="{% url 'reservations:commencer_service' r.id %}" class="btn btn-warning">Commencer</a>
+          {% elif r.statut == 'en_cours' %}
+            <a href="{% url 'reservations:terminer_service' r.id %}" class="btn btn-success">Terminer</a>
+          {% else %}
+            <span class="badge bg-secondary">{{ r.get_statut_display }}</span>
+          {% endif %}
+        </div>
+      </li>
     {% endfor %}
-</ul>
+  </ul>
+{% else %}
+  <p>Aucune réservation assignée.</p>
+{% endif %}
 {% endblock %}
