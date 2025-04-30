@@ -1,9 +1,175 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Modifier un Service{% endblock %}
+
 {% block content %}
-<h2>Modifier un service</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit" class="btn btn-primary">Mettre à jour</button>
-</form>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="d-flex align-items-center mb-4">
+                <a href="{% url 'services:liste_services' %}" class="btn btn-outline-secondary me-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="mb-0">Modifier un service</h1>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h5 class="mb-0">{{ service.nom }}</h5>
+                            <p class="text-muted small mb-0">{{ service.get_type_vehicule_display }} - {{ service.prix_affiche }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.nom.id_for_label }}" class="form-label">Nom du service</label>
+                            {{ form.nom }}
+                            {% if form.nom.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.nom.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Nom du service qui sera affiché aux clients</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.type_vehicule.id_for_label }}" class="form-label">Type de véhicule</label>
+                            {{ form.type_vehicule }}
+                            {% if form.type_vehicule.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.type_vehicule.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Le type de véhicule auquel ce service s'applique</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="{{ form.prix.id_for_label }}" class="form-label">Prix</label>
+                            <div class="input-group">
+                                {{ form.prix }}
+                                <span class="input-group-text">F CFA</span>
+                            </div>
+                            {% if form.prix.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.prix.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Prix du service en F CFA</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="{{ form.duree_estimee.id_for_label }}" class="form-label">Durée estimée</label>
+                            {{ form.duree_estimee }}
+                            {% if form.duree_estimee.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.duree_estimee.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <div class="form-text">Format: HH:MM:SS (ex: 01:30:00 pour 1h30)</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'services:liste_services' %}" class="btn btn-outline-secondary me-md-2">Annuler</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Enregistrer les modifications
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Validation côté client
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const nomInput = document.getElementById('{{ form.nom.id_for_label }}');
+        const prixInput = document.getElementById('{{ form.prix.id_for_label }}');
+        const dureeInput = document.getElementById('{{ form.duree_estimee.id_for_label }}');
+        
+        form.addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            // Validation du nom
+            if (!nomInput.value.trim()) {
+                showError(nomInput, 'Le nom du service est requis');
+                isValid = false;
+            } else {
+                clearError(nomInput);
+            }
+            
+            // Validation du prix
+            if (!prixInput.value.trim() || isNaN(prixInput.value) || parseInt(prixInput.value) < 0) {
+                showError(prixInput, 'Veuillez entrer un prix valide');
+                isValid = false;
+            } else {
+                clearError(prixInput);
+            }
+            
+            // Validation de la durée (format HH:MM:SS)
+            const dureeRegex = /^([0-9]{1,2}):([0-5][0-9]):([0-5][0-9])$/;
+            if (!dureeInput.value.trim() || !dureeRegex.test(dureeInput.value)) {
+                showError(dureeInput, 'Format requis: HH:MM:SS');
+                isValid = false;
+            } else {
+                clearError(dureeInput);
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+        
+        function showError(input, message) {
+            // Trouver le parent de l'input
+            const formGroup = input.closest('.mb-3') || input.closest('.mb-4');
+            input.classList.add('is-invalid');
+            
+            // Vérifier si un message d'erreur existe déjà
+            let errorDiv = formGroup.querySelector('.invalid-feedback');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'invalid-feedback d-block';
+                formGroup.appendChild(errorDiv);
+            }
+            
+            errorDiv.textContent = message;
+        }
+        
+        function clearError(input) {
+            input.classList.remove('is-invalid');
+            const formGroup = input.closest('.mb-3') || input.closest('.mb-4');
+            const errorDiv = formGroup.querySelector('.invalid-feedback');
+            if (errorDiv) {
+                errorDiv.textContent = '';
+            }
+        }
+    });
+</script>
 {% endblock %}

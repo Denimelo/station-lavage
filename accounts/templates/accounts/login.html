@@ -5,208 +5,474 @@
 
 {% block extra_css %}
 <style>
-    .login-container {
-        max-width: 500px;
-        margin: 2rem auto;
-        padding: 2rem;
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    :root {
+        --gradient-start: #FF8A00;
+        --gradient-middle: #FF5252;
+        --gradient-end: #FF4081;
+        --text-light: #ffffff;
+        --form-bg: #ffffff;
+        --input-border: #e2e8f0;
+        --button-color: #FF5252;
+        --button-hover: #FF4081;
     }
-    
+
+    body {
+        background-color: #f5f5f5;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .login-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+    }
+
+    .login-container {
+        display: flex;
+        width: 100%;
+        max-width: 1000px;
+        background: var(--form-bg);
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .welcome-section {
+        flex: 1;
+        background: linear-gradient(135deg, var(--gradient-start), var(--gradient-middle), var(--gradient-end));
+        color: var(--text-light);
+        padding: 3rem 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .welcome-clouds {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: 0;
+    }
+
+    .welcome-cloud {
+        position: absolute;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+    }
+
+    .welcome-cloud:nth-child(1) {
+        width: 100px;
+        height: 60px;
+        top: 20%;
+        left: 10%;
+    }
+
+    .welcome-cloud:nth-child(2) {
+        width: 150px;
+        height: 90px;
+        bottom: 15%;
+        right: 5%;
+    }
+
+    .welcome-cloud:nth-child(3) {
+        width: 120px;
+        height: 70px;
+        bottom: 40%;
+        left: 15%;
+    }
+
+    .welcome-cloud:nth-child(4) {
+        width: 80px;
+        height: 50px;
+        top: 60%;
+        right: 20%;
+    }
+
+    .welcome-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .welcome-title {
+        font-size: 4rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        line-height: 1.1;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .welcome-subtitle {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+    }
+
+    .welcome-image {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 60%;
+        height: auto;
+        z-index: 0;
+        opacity: 0.6;
+    }
+
+    .form-section {
+        flex: 1;
+        padding: 3rem 2rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
     .login-header {
         text-align: center;
         margin-bottom: 2rem;
     }
-    
+
     .login-logo {
-        max-height: 70px;
+        max-height: 60px;
         margin-bottom: 1rem;
     }
-    
+
     .login-title {
-        color: var(--primary);
+        font-size: 1.8rem;
+        color: #333;
         font-weight: 600;
-    }
-    
-    .form-control {
-        border-radius: 8px;
-        padding: 10px 15px;
-        border: 1px solid #e2e8f0;
-        margin-bottom: 1rem;
-    }
-    
-    .form-control:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
-    }
-    
-    .btn-login {
-        background-color: var(--primary);
-        border-color: var(--primary);
-        border-radius: 8px;
-        padding: 10px 20px;
-        font-weight: 600;
-        width: 100%;
-        margin-top: 1rem;
-    }
-    
-    .btn-login:hover {
-        background-color: var(--primary-dark);
-        border-color: var(--primary-dark);
-    }
-    
-    .login-footer {
-        text-align: center;
-        margin-top: 1.5rem;
-    }
-    
-    .login-footer a {
-        color: var(--primary);
-        text-decoration: none;
-    }
-    
-    .login-footer a:hover {
-        text-decoration: underline;
-    }
-    
-    .form-group label {
-        font-weight: 500;
         margin-bottom: 0.5rem;
     }
-    
-    .error-text {
-        color: var(--danger);
+
+    .login-subtitle {
+        color: #6c757d;
+        font-size: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .form-group label {
+        font-weight: 400;
+        margin-bottom: 0.3rem;
+        display: block;
+        color: #555;
         font-size: 0.9rem;
-        margin-top: -0.5rem;
+    }
+
+    .form-control {
+        width: 100%;
+        border-radius: 4px;
+        padding: 12px 15px;
+        border: 1px solid #e0e0e0;
+        border-bottom: 2px solid #e0e0e0;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+        background-color: #fff;
+    }
+
+    .form-control:focus {
+        border-color: #e0e0e0;
+        border-bottom-color: var(--gradient-middle);
+        box-shadow: none;
+        outline: none;
+    }
+
+    .input-icon-wrapper {
+        position: relative;
+    }
+
+    .input-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #aaa;
+        opacity: 0.7;
+    }
+    
+    .form-control::placeholder {
+        color: #bbb;
+        opacity: 1;
+        font-size: 0.95rem;
+    }
+
+    .btn-login {
+        background: linear-gradient(to right, #FF5252, #FF4081);
+        border: none;
+        border-radius: 50px;
+        padding: 14px 20px;
+        font-weight: 600;
+        width: 100%;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 3px 10px rgba(255, 82, 82, 0.3);
+    }
+
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 82, 82, 0.5);
+    }
+
+    .btn-login i {
+        margin-right: 8px;
+    }
+
+    .form-check {
+        display: flex;
+        align-items: center;
+    }
+
+    .form-check-input {
+        margin-right: 8px;
+        cursor: pointer;
+    }
+
+    .form-check-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        cursor: pointer;
+    }
+
+    .forgot-password {
+        text-align: right;
+        margin-top: -5px;
         margin-bottom: 1rem;
     }
-    
-    .help-text {
-        color: var(--secondary);
+
+    .forgot-password a {
+        color: #FF4081;
         font-size: 0.9rem;
-        margin-top: -0.5rem;
-        margin-bottom: 1rem;
+        text-decoration: none;
     }
-    
-    .social-login {
-        text-align: center;
-        margin: 1.5rem 0;
+
+    .forgot-password a:hover {
+        text-decoration: underline;
     }
-    
+
     .social-login-divider {
         display: flex;
         align-items: center;
         margin: 1.5rem 0;
     }
-    
+
     .social-login-divider:before,
     .social-login-divider:after {
         content: "";
         flex: 1;
         border-bottom: 1px solid #e2e8f0;
     }
-    
+
     .social-login-divider span {
         margin: 0 1rem;
-        color: var(--secondary);
+        color: #6c757d;
+        font-size: 0.9rem;
     }
-    
+
+    .social-login {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+
     .btn-social {
-        display: inline-block;
-        width: 40px;
-        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 45px;
+        height: 45px;
         border-radius: 50%;
-        margin: 0 5px;
-        line-height: 40px;
-        text-align: center;
         background-color: #f8f9fa;
         color: #6c757d;
         transition: all 0.3s ease;
+        text-decoration: none;
     }
-    
+
     .btn-social:hover {
         transform: translateY(-3px);
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    
+
     .btn-facebook:hover {
         background-color: #3b5998;
         color: white;
     }
-    
+
     .btn-google:hover {
         background-color: #db4437;
         color: white;
+    }
+
+    .login-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+
+    .login-footer a {
+        color: var(--gradient-middle);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .login-footer a:hover {
+        text-decoration: underline;
+    }
+
+    .error-text {
+        color: #dc3545;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Alert styles */
+    .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+    }
+
+    .alert-danger {
+        background-color: #fff5f5;
+        color: #dc3545;
+        border-left: 4px solid #dc3545;
+    }
+
+    .alert i {
+        margin-right: 8px;
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+        .login-container {
+            flex-direction: column;
+            max-width: 500px;
+        }
+
+        .welcome-section {
+            padding: 2rem;
+            min-height: 200px;
+        }
+
+        .welcome-title {
+            font-size: 3rem;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container my-5">
+<div class="login-page">
     <div class="login-container">
-        <div class="login-header">
-            <img src="{% static 'images/aquanova-logo.png' %}" alt="AquaNova SARL" class="login-logo" onerror="this.onerror=null; this.src='/api/placeholder/150/70'; this.alt='AquaNova';">
-            <h2 class="login-title">Connexion</h2>
-            <p class="text-muted">Accédez à votre compte pour gérer vos réservations</p>
+        <div class="welcome-section">
+            <div class="welcome-clouds">
+                <div class="welcome-cloud"></div>
+                <div class="welcome-cloud"></div>
+                <div class="welcome-cloud"></div>
+                <div class="welcome-cloud"></div>
+            </div>
+            <div class="welcome-content">
+                <h1 class="welcome-title">BIENVENUE</h1>
+                <p class="welcome-subtitle">Chez AquaNova SARL, votre satisfaction est notre priorité</p>
+            </div>
         </div>
         
-        {% if form.errors %}
-            <div class="alert alert-danger" role="alert">
-                <i class="fas fa-exclamation-circle"></i> Identifiants incorrects. Veuillez réessayer.
-            </div>
-        {% endif %}
-        
-        <form method="post" class="login-form">
-            {% csrf_token %}
-            
-            <div class="form-group">
-                <label for="{{ form.username.id_for_label }}">Nom d'utilisateur ou Email</label>
-                {{ form.username }}
-                {% if form.username.errors %}
-                    <div class="error-text">{{ form.username.errors }}</div>
-                {% endif %}
+        <div class="form-section">
+            <div class="login-header">
+                <img src="{% static 'images/aquanova-logo.png' %}" alt="AquaNova SARL" class="login-logo" onerror="this.onerror=null; this.src='/api/placeholder/150/60'; this.alt='AquaNova';">
+                <h2 class="login-title">Connexion</h2>
+                <p class="login-subtitle">Accédez à votre compte pour gérer vos réservations</p>
             </div>
             
-            <div class="form-group">
-                <label for="{{ form.password.id_for_label }}">Mot de passe</label>
-                {{ form.password }}
-                {% if form.password.errors %}
-                    <div class="error-text">{{ form.password.errors }}</div>
-                {% endif %}
+            {% if form.errors %}
+                <div class="alert alert-danger" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> Identifiants incorrects. Veuillez réessayer.
+                </div>
+            {% endif %}
+            
+            <form method="post" class="login-form">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}">Adresse email</label>
+                    <div class="input-icon-wrapper">
+                        {{ form.username }}
+                        <span class="input-icon">
+                            <i class="fas fa-user"></i>
+                        </span>
+                    </div>
+                    {% if form.username.errors %}
+                        <div class="error-text">{{ form.username.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.telephone.id_for_label }}">Numéro de téléphone</label>
+                    {{ form.telephone }}
+                    {% if form.telephone.errors %}
+                        <div class="error-text">{{ form.telephone.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.password.id_for_label }}">Mot de passe</label>
+                    <div class="input-icon-wrapper">
+                        {{ form.password }}
+                        <span class="input-icon">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                    </div>
+                    {% if form.password.errors %}
+                        <div class="error-text">{{ form.password.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="d-flex justify-content-between mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="remember-me" name="remember">
+                        <label class="form-check-label" for="remember-me">
+                            Se souvenir de moi
+                        </label>
+                    </div>
+                    <div class="forgot-password">
+                        <a href="{% url 'password_reset' %}" style="color: #FF4081;">Mot de passe oublié ?</a>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-login">
+                    <i class="fas fa-sign-in-alt"></i>Se connecter
+                </button>
+            </form>
+            
+            <div class="social-login-divider">
+                <span>ou connectez-vous avec</span>
             </div>
             
-            <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" id="remember-me" name="remember">
-                <label class="form-check-label" for="remember-me">
-                    Se souvenir de moi
-                </label>
+            <div class="social-login">
+                <a href="#" class="btn-social btn-facebook">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="#" class="btn-social btn-google">
+                    <i class="fab fa-google"></i>
+                </a>
             </div>
             
-            <button type="submit" class="btn btn-primary btn-login">
-                <i class="fas fa-sign-in-alt mr-2"></i> Se connecter
-            </button>
-            
-            <div class="text-center mt-3">
-                <a href="{% url 'password_reset' %}" class="text-primary">Mot de passe oublié ?</a>
+            <div class="login-footer">
+                <p>Vous n'avez pas de compte ? <a href="{% url 'register' %}">Inscrivez-vous maintenant</a></p>
             </div>
-        </form>
-        
-        <div class="social-login-divider">
-            <span>ou connectez-vous avec</span>
-        </div>
-        
-        <div class="social-login">
-            <a href="#" class="btn-social btn-facebook">
-                <i class="fab fa-facebook-f"></i>
-            </a>
-            <a href="#" class="btn-social btn-google">
-                <i class="fab fa-google"></i>
-            </a>
-        </div>
-        
-        <div class="login-footer">
-            <p>Vous n'avez pas de compte ? <a href="{% url 'register' %}">Inscrivez-vous maintenant</a></p>
         </div>
     </div>
 </div>
