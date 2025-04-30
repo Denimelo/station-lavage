@@ -1,10 +1,53 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Supprimer un Service{% endblock %}
+
 {% block content %}
-<h2>Confirmer la suppression</h2>
-<p>Êtes-vous sûr de vouloir supprimer le service : <strong>{{ service.nom }}</strong> ?</p>
-<form method="post">
-  {% csrf_token %}
-  <button type="submit" class="btn btn-danger">Supprimer</button>
-  <a href="{% url 'services:liste_services' %}" class="btn btn-secondary">Annuler</a>
-</form>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="d-flex align-items-center mb-4">
+                <a href="{% url 'services:liste_services' %}" class="btn btn-outline-secondary me-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="mb-0">Supprimer un service</h1>
+            </div>
+
+            <div class="card border-danger shadow-sm">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirmation de suppression
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <p class="mb-1">Vous êtes sur le point de supprimer le service suivant :</p>
+                        <h5 class="mt-2">{{ service.nom }}</h5>
+                        <p class="mb-0 text-muted">
+                            <span class="badge rounded-pill bg-info text-dark me-2">{{ service.get_type_vehicule_display }}</span>
+                            <strong>{{ service.prix_affiche }}</strong>
+                        </p>
+                    </div>
+                    
+                    <p class="text-danger">
+                        <strong>Attention :</strong> Cette action est irréversible. Tous les détails du service seront définitivement supprimés.
+                    </p>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'services:liste_services' %}" class="btn btn-outline-secondary me-md-2">
+                                <i class="fas fa-times me-2"></i>Annuler
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash-alt me-2"></i>Confirmer la suppression
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

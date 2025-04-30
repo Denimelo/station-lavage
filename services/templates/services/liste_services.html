@@ -1,16 +1,105 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestion des Services{% endblock %}
+
 {% block content %}
-<h2>Liste des services</h2>
-<a href="{% url 'services:ajouter_service' %}" class="btn btn-success">Ajouter un service</a>
-<ul>
-  {% for service in services %}
-    <li>
-      {{ service.nom }} ({{ service.type_vehicule }}) - {{ service.prix }} FCFA
-      [<a href="{% url 'services:modifier_service' service.pk %}">modifier</a> |
-       <a href="{% url 'services:supprimer_service' service.pk %}">supprimer</a>]
-    </li>
-  {% empty %}
-    <li>Aucun service disponible.</li>
-  {% endfor %}
-</ul>
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="mb-3">Gestion des Services</h1>
+            <p class="text-muted">Gérez les services proposés par votre station de lavage</p>
+        </div>
+        <div class="col-auto d-flex align-items-center">
+            <a href="{% url 'services:ajouter_service' %}" class="btn btn-primary">
+                <i class="fas fa-plus-circle me-2"></i>Ajouter un service
+            </a>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <div class="row align-items-center">
+                <div class="col-md-3"><strong>Service</strong></div>
+                <div class="col-md-3"><strong>Type de véhicule</strong></div>
+                <div class="col-md-2"><strong>Prix</strong></div>
+                <div class="col-md-2"><strong>Durée estimée</strong></div>
+                <div class="col-md-2"><strong>Actions</strong></div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if services %}
+                <div class="list-group list-group-flush">
+                    {% for service in services %}
+                        <div class="list-group-item">
+                            <div class="row align-items-center">
+                                <div class="col-md-3">
+                                    <span class="fw-medium">{{ service.nom }}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <span class="badge rounded-pill bg-info text-dark">
+                                        {{ service.get_type_vehicule_display }}
+                                    </span>
+                                </div>
+                                <div class="col-md-2">
+                                    <span class="fw-bold">{{ service.prix_affiche }}</span>
+                                </div>
+                                <div class="col-md-2">
+                                  <span class="text-nowrap">
+                                    {% if service.duree_heures %}{{ service.duree_heures }}h{% endif %}
+                                    {% if service.duree_minutes %} {{ service.duree_minutes }}min{% endif %}
+                                  </span>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'services:modifier_service' service.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'services:supprimer_service' service.id %}" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <img src="{% static 'images/empty-state.svg' %}" alt="Aucun service" class="img-fluid mb-3" style="max-height: 150px;">
+                    <h5>Aucun service enregistré</h5>
+                    <p class="text-muted">Commencez par ajouter un service pour votre station de lavage</p>
+                    <a href="{% url 'services:ajouter_service' %}" class="btn btn-primary">
+                        <i class="fas fa-plus-circle me-2"></i>Ajouter un service
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Afficher un message de confirmation avant suppression
+    document.addEventListener('DOMContentLoaded', function() {
+        const deleteButtons = document.querySelectorAll('a[href^="{% url "services:supprimer_service" 0 %}"'.replace('/0/', '/'));
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                if (!confirm('Êtes-vous sûr de vouloir supprimer ce service ?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

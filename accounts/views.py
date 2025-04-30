@@ -3,6 +3,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.http import HttpResponse
 from django.urls import reverse
+from services.models import Service
 from django.contrib.auth.decorators import login_required
 from .forms import CustomUserCreationForm, CustomAuthenticationForm
 
@@ -58,3 +59,13 @@ def dashboard(request):
 @login_required
 def dashboard_client(request):
     return render(request, 'accounts/dashboard_client.html')
+
+@login_required
+def dashboard_gestionnaire(request):
+    if request.user.role != 'gestionnaire':
+        return redirect('login')
+
+    services = Service.objects.all()
+    return render(request, 'accounts/dashboard_gestionnaire.html', {
+        'services': services
+    })

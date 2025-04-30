@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Erreur de Suppression{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="d-flex align-items-center mb-4">
+                <a href="{% url 'services:liste_services' %}" class="btn btn-outline-secondary me-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="mb-0">Impossible de supprimer</h1>
+            </div>
+
+            <div class="card border-warning shadow-sm">
+                <div class="card-header bg-warning">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-circle me-2"></i>Suppression impossible
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <img src="{% static 'images/warning.svg' %}" alt="Avertissement" class="img-fluid mb-3" style="max-height: 120px;">
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <h5 class="alert-heading">{{ service.nom }}</h5>
+                        <p>{{ message }}</p>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Détails du service</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Type de véhicule</span>
+                                    <span class="badge rounded-pill bg-info text-dark">{{ service.get_type_vehicule_display }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Prix</span>
+                                    <span class="fw-bold">{{ service.prix_affiche }}</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Durée estimée</span>
+                                    <span>
+                                        {% with h=service.duree_estimee.seconds|floatformat:0|divisibleby:'3600' m=service.duree_estimee.seconds|floatformat:0|divisibleby:'60'|floatformat:0 %}
+                                            {{ service.duree_estimee.seconds|floatformat:0|intdiv:3600 }}h
+                                            {% if not service.duree_estimee.seconds|floatformat:0|intdiv:3600|floatformat:0|multiply:3600 == service.duree_estimee.seconds|floatformat:0 %}
+                                                {{ service.duree_estimee.seconds|floatformat:0|intdiv:60|mod:60 }}min
+                                            {% endif %}
+                                        {% endwith %}
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <span>Suggestion: Vous pouvez désactiver ce service au lieu de le supprimer si vous ne souhaitez plus le proposer.</span>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'services:liste_services' %}" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Retour à la liste des services
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
