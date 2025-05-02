@@ -1,0 +1,90 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+
+{% block dashboard_content %}
+<div class="container mt-4">
+    <h2>📄 Rapports d'activités</h2>
+
+    <div class="mb-3">
+        <a href="#" class="btn btn-danger">📥 Exporter en PDF</a>
+        <a href="#" class="btn btn-success">📊 Exporter en Excel</a>
+    </div>
+
+    <table class="table table-bordered table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Date</th>
+                <th>Nombre de Réservations</th>
+                <th>Services Réalisés</th>
+                <th>Revenu Total (CFA)</th>
+                <th>Employés</th>
+                <th>Clients</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rapport in rapports %}
+            <tr>
+                <td>{{ rapport.date }}</td>
+                <td>{{ rapport.nombre_reservations }}</td>
+                <td>{{ rapport.services_realises }}</td>
+                <td>{{ rapport.revenu_total }}</td>
+                <td>{{ rapport.nombre_employes }}</td>
+                <td>{{ rapport.nombre_clients }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center">Aucun rapport enregistré</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+<div class="container py-4">
+    <h2 class="mb-4">📑 Rapports - Station de Lavage</h2>
+
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-4">
+            <label for="start_date" class="form-label">Date de début</label>
+            <input type="date" id="start_date" name="start_date" class="form-control" value="{{ request.GET.start_date }}">
+        </div>
+        <div class="col-md-4">
+            <label for="end_date" class="form-label">Date de fin</label>
+            <input type="date" id="end_date" name="end_date" class="form-control" value="{{ request.GET.end_date }}">
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">📅 Générer</button>
+        </div>
+    </form>
+
+    {% if rapports %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Client</th>
+                        <th>Service</th>
+                        <th>Montant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in rapports %}
+                        <tr>
+                            <td>{{ r.date }}</td>
+                            <td>{{ r.client.nom }}</td>
+                            <td>{{ r.service.nom }}</td>
+                            <td>{{ r.montant }} F CFA</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-3">
+            <strong>💰 Total:</strong> {{ total_montant }} F CFA
+        </div>
+    {% else %}
+        <p class="text-muted mt-4">Aucun rapport disponible pour la période sélectionnée.</p>
+    {% endif %}
+</div>
+{% endblock %}

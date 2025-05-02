@@ -22,6 +22,10 @@
     <label for="id_service">Service</label>
     <select name="service" id="service-options" class="form-select">
       <option value="">--- Choisissez un service ---</option>
+      <option value="">---  Autres ---</option>
+      {% for vehicule in form.fields.vehicule.queryset %}
+      <option value="{{ service.id }}">{{ service.nom }}</option>
+    {% endfor %}
     </select>
   
     {{ form.heure_debut.label_tag }} {{ form.heure_debut }}

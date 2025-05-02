@@ -1,0 +1,478 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+
+{% block dashboard_content %}
+        <!-- Dashboard Content -->
+        <div class="dashboard-container">
+            <!-- Statistics cards -->
+            <div class="row">
+                <!-- Card 1 -->
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="dashboard-card stats-card animate-fadeInUp delay-1">
+                        <i class="fas fa-calendar-check"></i>
+                        <div class="stats-value">{{ stats.total_reservations }}</div>
+                        <div class="stats-label">Réservations totales</div>
+                    </div>
+                </div>
+                
+                <!-- Card 2 -->
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="dashboard-card stats-card animate-fadeInUp delay-2">
+                        <i class="fas fa-car"></i>
+                        <div class="stats-value">{{ stats.services_today }}</div>
+                        <div class="stats-label">Services aujourd'hui</div>
+                    </div>
+                </div>
+                
+                <!-- Card 3 -->
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="dashboard-card stats-card animate-fadeInUp delay-3">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <div class="stats-value">{{ stats.revenue_today }} FCFA</div>
+                        <div class="stats-label">Revenus du jour</div>
+                    </div>
+                </div>
+                
+                <!-- Card 4 -->
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="dashboard-card stats-card animate-fadeInUp delay-4">
+                        <i class="fas fa-users"></i>
+                        <div class="stats-value">{{ stats.total_clients }}</div>
+                        <div class="stats-label">Clients enregistrés</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Charts -->
+            <div class="row">
+                <!-- Chart 1: Services par jour -->
+                <div class="col-lg-8 mb-4">
+                    <div class="dashboard-card animate-fadeInUp delay-1">
+                        <div class="dashboard-card-header">
+                            <h5>Services par jour</h5>
+                            <div class="filter-btn-group btn-group btn-group-sm">
+                                <button type="button" class="btn active" data-period="week">Semaine</button>
+                                <button type="button" class="btn" data-period="month">Mois</button>
+                                <button type="button" class="btn" data-period="year">Année</button>
+                            </div>
+                        </div>
+                        <div class="dashboard-card-body">
+                            <div class="chart-container">
+                                <canvas id="servicesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chart 2: Services par catégorie -->
+                <div class="col-lg-4 mb-4">
+                    <div class="dashboard-card animate-fadeInUp delay-2">
+                        <div class="dashboard-card-header">
+                            <h5>Répartition des services</h5>
+                        </div>
+                        <div class="dashboard-card-body">
+                            <div class="chart-container">
+                                <canvas id="serviceTypesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Second row of charts -->
+            <div class="row">
+                <!-- Chart 3: Revenus par mois -->
+                <div class="col-lg-6 mb-4">
+                    <div class="dashboard-card animate-fadeInUp delay-3">
+                        <div class="dashboard-card-header">
+                            <h5>Revenus mensuels</h5>
+                        </div>
+                        <div class="dashboard-card-body">
+                            <div class="chart-container">
+                                <canvas id="revenueChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chart 4: Performance des employés -->
+                <div class="col-lg-6 mb-4">
+                    <div class="dashboard-card animate-fadeInUp delay-4">
+                        <div class="dashboard-card-header">
+                            <h5>Performance des employés</h5>
+                        </div>
+                        <div class="dashboard-card-body">
+                            <div class="chart-container">
+                                <canvas id="employeePerformanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tables & Lists -->
+            <div class="row">
+                <!-- Recent reservations -->
+                <div class="col-lg-6 mb-4">
+                    <div class="dashboard-card animate-fadeInUp delay-1">
+                        <div class="dashboard-card-header">
+                            <h5>Réservations récentes</h5>
+                            <a href="{% url 'reservations:liste_reservations_gestionnaire' %}" class="btn btn-sm btn-primary">Voir tout</a>
+                        </div>
+                        <div class="dashboard-card-body">
+                            <div class="table-responsive">
+                                <table class="table custom-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Client</th>
+                                            <th>Service</th>
+                                            <th>Date</th>
+                                            <th>Statut</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for reservation in recent_reservations %}
+                                        <tr>
+                                            <td>{{ reservation.client.prenom }} {{ reservation.client.nom }}</td>
+                                            <td>{{ reservation.service.nom }}</td>
+                                            <td>{{ reservation.date_heure|date:"d/m/Y H:i" }}</td>
+                                            <td>
+                                                {% if reservation.statut == 'en_attente' %}
+                                                <span class="status-badge badge-pending">En attente</span>
+                                                {% elif reservation.statut == 'confirme' %}
+                                                <span class="status-badge badge-confirmed">Confirmé</span>
+                                                {% elif reservation.statut == 'en_cours' %}
+                                                <span class="status-badge badge-in-progress">En cours</span>
+                                                {% elif reservation.statut == 'termine' %}
+                                                <span class="status-badge badge-completed">Terminé</span>
+                                                {% elif reservation.statut == 'annule' %}
+                                                <span class="status-badge badge-cancelled">Annulé</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="4" class="text-center">Aucune réservation récente</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent activity -->
+                <div class="col-lg-6 mb-4">
+                    <div class="dashboard-card animate-fadeInUp delay-2">
+                        <div class="dashboard-card-header">
+                            <h5>Activité récente</h5>
+                        </div>
+                        <div class="dashboard-card-body">
+                            <div class="recent-activity">
+                                {% for activity in recent_activity %}
+                                <div class="activity-item d-flex align-items-center">
+                                    <div class="activity-icon 
+                                        {% if activity.type == 'reservation' %}bg-primary
+                                        {% elif activity.type == 'service' %}bg-success
+                                        {% elif activity.type == 'client' %}bg-info
+                                        {% elif activity.type == 'employe' %}bg-warning
+                                        {% elif activity.type == 'paiement' %}bg-dark
+                                        {% else %}bg-secondary{% endif %} text-white">
+                                        <i class="fas 
+                                            {% if activity.type == 'reservation' %}fa-calendar-plus
+                                            {% elif activity.type == 'service' %}fa-car-wash
+                                            {% elif activity.type == 'client' %}fa-user-plus
+                                            {% elif activity.type == 'employe' %}fa-user-tie
+                                            {% elif activity.type == 'paiement' %}fa-money-bill
+                                            {% else %}fa-bell{% endif %}"></i>
+                                    </div>
+                                    <div class="ml-3 flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <strong>{{ activity.titre }}</strong>
+                                            <span class="activity-time">{{ activity.date|date:"H:i" }}</span>
+                                        </div>
+                                        <p class="mb-0">{{ activity.description }}</p>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="text-center py-3">
+                                    <p>Aucune activité récente</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+<!-- DataTables -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+<!-- Custom JS -->
+<script>
+    // Sidebar Toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const sidebarCollapseBtn = document.getElementById('sidebarCollapseBtn');
+        const mobileNavToggle = document.getElementById('mobileNavToggle');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        
+        // Function to toggle sidebar on desktop
+        sidebarCollapseBtn.addEventListener('click', function() {
+            sidebar.classList.toggle('sidebar-collapsed');
+            mainContent.classList.toggle('content-collapsed');
+        });
+        
+        // Function to toggle sidebar on mobile
+        mobileNavToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('sidebar-visible');
+            sidebarOverlay.classList.toggle('active');
+        });
+        
+        // Close sidebar when clicking overlay
+        sidebarOverlay.addEventListener('click', function() {
+            sidebar.classList.remove('sidebar-visible');
+            sidebarOverlay.classList.remove('active');
+        });
+        
+        // Initialize DataTables
+        if($.fn.DataTable) {
+            $('.datatable').DataTable({
+                responsive: true,
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.10.21/i18n/French.json"
+                }
+            });
+        }
+        
+        // Example Chart Data (replace with actual data)
+        function initCharts() {
+            // Services Chart 
+            if(document.getElementById('servicesChart')) {
+                const ctxServices = document.getElementById('servicesChart').getContext('2d');
+                const servicesChart = new Chart(ctxServices, {
+                    type: 'line',
+                    data: {
+                        labels: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'],
+                        datasets: [{
+                            label: 'Nombre de services',
+                            data: [12, 19, 15, 17, 21, 25, 14],
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            borderColor: '#3498db',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#3498db',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        tooltips: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        hover: {
+                            mode: 'nearest',
+                            intersect: true
+                        },
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    precision: 0
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0.05)',
+                                    zeroLineColor: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }],
+                            xAxes: [{
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0.05)'
+                                }
+                            }]
+                        },
+                        animation: {
+                            duration: 2000,
+                            easing: 'easeOutQuart'
+                        }
+                    }
+                });
+            }
+            
+            // Service Types Chart
+            if(document.getElementById('serviceTypesChart')) {
+                const ctxTypes = document.getElementById('serviceTypesChart').getContext('2d');
+                const serviceTypesChart = new Chart(ctxTypes, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Lavage standard', 'Lavage premium', 'Polissage', 'Nettoyage intérieur', 'Autre'],
+                        datasets: [{
+                            data: [35, 25, 15, 20, 5],
+                            backgroundColor: ['#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#e74c3c'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutoutPercentage: 65,
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                boxWidth: 12
+                            }
+                        },
+                        animation: {
+                            animateScale: true,
+                            animateRotate: true,
+                            duration: 2000,
+                            easing: 'easeOutQuart'
+                        },
+                        tooltips: {
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    const dataset = data.datasets[tooltipItem.datasetIndex];
+                                    const total = dataset.data.reduce((previousValue, currentValue) => previousValue + currentValue);
+                                    const currentValue = dataset.data[tooltipItem.index];
+                                    const percentage = Math.floor(((currentValue/total) * 100)+0.5);
+                                    return data.labels[tooltipItem.index] + ': ' + percentage + '%';
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Revenue Chart
+            if(document.getElementById('revenueChart')) {
+                const ctxRevenue = document.getElementById('revenueChart').getContext('2d');
+                const revenueChart = new Chart(ctxRevenue, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'],
+                        datasets: [{
+                            label: 'Revenus (FCFA)',
+                            data: [450000, 520000, 485000, 650000, 700000, 675000, 720000, 680000, 750000, 800000, 850000, 900000],
+                            backgroundColor: '#2ecc71',
+                            borderWidth: 0,
+                            borderRadius: 5,
+                            maxBarThickness: 30
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    callback: function(value) {
+                                        return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' FCFA';
+                                    }
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0.05)',
+                                    zeroLineColor: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }],
+                            xAxes: [{
+                                gridLines: {
+                                    display: false
+                                }
+                            }]
+                        },
+                        tooltips: {
+                            callbacks: {
+                                label: function(tooltipItem, data) {
+                                    return tooltipItem.yLabel.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ") + ' FCFA';
+                                }
+                            }
+                        },
+                        animation: {
+                            duration: 2000,
+                            easing: 'easeOutQuart'
+                        }
+                    }
+                });
+            }
+            
+            // Employee Performance Chart
+            if(document.getElementById('employeePerformanceChart')) {
+                const ctxEmployee = document.getElementById('employeePerformanceChart').getContext('2d');
+                const employeePerformanceChart = new Chart(ctxEmployee, {
+                    type: 'horizontalBar',
+                    data: {
+                        labels: ['Jean Dupont', 'Marie Touré', 'Marc Koné', 'Fatou Diallo', 'Paul Traoré'],
+                        datasets: [{
+                            label: 'Services effectués',
+                            data: [52, 45, 38, 35, 30],
+                            backgroundColor: '#9b59b6',
+                            borderWidth: 0,
+                            borderRadius: 5,
+                            maxBarThickness: 25
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            xAxes: [{
+                                ticks: {
+                                    beginAtZero: true,
+                                    precision: 0
+                                },
+                                gridLines: {
+                                    color: 'rgba(0, 0, 0, 0.05)',
+                                    zeroLineColor: 'rgba(0, 0, 0, 0.1)'
+                                }
+                            }],
+                            yAxes: [{
+                                gridLines: {
+                                    display: false
+                                }
+                            }]
+                        },
+                        animation: {
+                            duration: 2000,
+                            easing: 'easeOutQuart'
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Initialize all charts
+        initCharts();
+        
+        // Handle chart filter buttons
+        document.querySelectorAll('.filter-btn-group .btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const parent = this.parentElement;
+                parent.querySelectorAll('.btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                
+                // Here you would update the chart data based on the selected period
+                // For example:
+                // const period = this.dataset.period;
+                // updateChartData(period);
+            });
+        });
+    });
+</script>
+{% endblock %}

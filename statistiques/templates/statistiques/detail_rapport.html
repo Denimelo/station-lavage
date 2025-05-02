@@ -1,0 +1,585 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+
+{% block dashboard_content %}
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">
+            Rapport {{ rapport.get_type_periode_display }} du {{ rapport.date_debut|date:"d/m/Y" }} au {{ rapport.date_fin|date:"d/m/Y" }}
+        </h4>
+        <button onclick="window.print();" class="btn btn-light btn-sm">
+            <i class="fas fa-print me-1"></i> Imprimer
+        </button>
+    </div>
+    <div class="card-body">
+        <!-- Synthèse des chiffres clés -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card mb-3 border-primary">
+                    <div class="card-body text-center">
+                        <h3 class="text-primary mb-0">{{ rapport.nombre_reservations }}</h3>
+                        <p class="card-text">Réservations</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card mb-3 border-success">
+                    <div class="card-body text-center">
+                        <h3 class="text-success mb-0">{{ rapport.nombre_reservations_terminees }}</h3>
+                        <p class="card-text">Services terminés</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card mb-3 border-danger">
+                    <div class="card-body text-center">
+                        <h3 class="text-danger mb-0">{{ rapport.nombre_reservations_annulees }}</h3>
+                        <p class="card-text">Réservations annulées</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card mb-3 border-info">
+                    <div class="card-body text-center">
+                        <h3 class="text-info mb-0">{{ rapport.revenu_total }}</h3>
+                        <p class="card-text">Revenus (F CFA)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0">{{ rapport.nombre_clients_actifs }}</h3>
+                        <p class="card-text">Clients actifs</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0">{{ rapport.nombre_employes_actifs }}</h3>
+                        <p class="card-text">Employés actifs</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0">
+                            {% if rapport.note_moyenne > 0 %}
+                                {{ rapport.note_moyenne|floatformat:1 }}/5
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </h3>
+                        <p class="card-text">Note moyenne</p>
+                        {% if rapport.note_moyenne > 0 %}
+                            <div>
+                                {% for i in "12345"|make_list %}
+                                    {% if forloop.counter <= rapport.note_moyenne|floatformat:"0"|add:"0" %}
+                                        <i class="fas fa-star text-warning"></i>
+                                    {% else %}
+                                        <i class="far fa-star text-warning"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphiques et analyses détaillées -->
+        <div class="row mt-4">
+            <!-- Services populaires -->
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">Services les plus populaires</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if services_popularite %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Service</th>
+                                            <th>Type</th>
+                                            <th>Réservations</th>
+                                            <th>%</th>
+                                            <th>Revenus</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for service in services_popularite %}
+                                            <tr>
+                                                <td>{{ service.service_nom }}</td>
+                                                <td>{{ service.service_type_vehicule }}</td>
+                                                <td>{{ service.nombre_reservations }}</td>
+                                                <td>{{ service.pourcentage|floatformat:1 }}%</td>
+                                                <td>{{ service.revenu_genere }} F CFA</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Graphique des services -->
+                            <div class="mt-3">
+                                <canvas id="servicesChart" width="400" height="300"></canvas>
+                            </div>
+                        {% else %}
+                            <p class="text-muted">Aucune donnée disponible sur les services pour cette période.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Performances des employés -->
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">Performances des employés</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if performances_employes %}
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Employé</th>
+                                            <th>Services</th>
+                                            <th>Note moyenne</th>
+                                            <th>Durée travail</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for perf in performances_employes %}
+                                            <tr>
+                                                <td>{{ perf.employe.prenom }} {{ perf.employe.nom }}</td>
+                                                <td>{{ perf.services_realises }}</td>
+                                                <td>
+                                                    {% if perf.note_moyenne > 0 %}
+                                                        {{ perf.note_moyenne|floatformat:1 }}/5
+                                                    {% else %}
+                                                        N/A
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if perf.duree_travail_total %}
+                                                        {% with total_seconds=perf.duree_travail_total.total_seconds|floatformat:"0" %}
+                                                            {% with heures=total_seconds|stringformat:"i"|slice:":2" %}
+                                                                {{ heures }}h
+                                                                {% with minutes=total_seconds|stringformat:"i"|slice:"3:5" %}
+                                                                    {% if minutes != "00" %}
+                                                                        {{ minutes }}m
+                                                                    {% endif %}
+                                                                {% endwith %}
+                                                            {% endwith %}
+                                                        {% endwith %}
+                                                    {% else %}
+                                                        0h
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Graphique des performances employés -->
+                            <div class="mt-3">
+                                <canvas id="employesChart" width="400" height="300"></canvas>
+                            </div>
+                        {% else %}
+                            <p class="text-muted">Aucune donnée disponible sur les performances des employés pour cette période.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Taux d'occupation -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Analyse de l'occupation</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h3 class="mb-0">{{ rapport.taux_occupation|floatformat:1 }}%</h3>
+                                <p class="card-text">Taux d'occupation moyen</p>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar bg-success" role="progressbar" 
+                                         style="width: {{ rapport.taux_occupation }}%;" 
+                                         aria-valuenow="{{ rapport.taux_occupation|floatformat:0 }}" 
+                                         aria-valuemin="0" aria-valuemax="100">
+                                        {{ rapport.taux_occupation|floatformat:1 }}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="alert alert-info">
+                            <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i> Analyse d'occupation</h5>
+                            <p>
+                                Ce taux représente le pourcentage de temps pendant lequel vos employés étaient 
+                                en service actif sur la période analysée.
+                            </p>
+                            <hr>
+                            <p class="mb-0">
+                                {% if rapport.taux_occupation < 30 %}
+                                    <span class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i> Attention</span> : 
+                                    Le taux d'occupation est faible. Envisagez de promouvoir davantage vos services ou 
+                                    d'ajuster le nombre d'employés disponibles.
+                                {% elif rapport.taux_occupation < 60 %}
+                                    <span class="text-warning"><i class="fas fa-info-circle me-1"></i> Remarque</span> : 
+                                    Le taux d'occupation est modéré. Il existe une marge d'amélioration pour optimiser 
+                                    la planification des services.
+                                {% else %}
+                                    <span class="text-success"><i class="fas fa-check-circle me-1"></i> Bon</span> : 
+                                    Le taux d'occupation est élevé. Votre planification des services est efficace.
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Graphique d'occupation par jour/semaine -->
+                <div class="mt-4">
+                    <h5>Répartition de l'occupation</h5>
+                    <canvas id="occupationChart" width="800" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Statistiques clients -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Analyse des clients</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-body text-center">
+                                <h3 class="mb-0">{{ rapport.nombre_nouveaux_clients }}</h3>
+                                <p class="card-text">Nouveaux clients</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-body text-center">
+                                <h3 class="mb-0">{{ rapport.taux_retention|floatformat:1 }}%</h3>
+                                <p class="card-text">Taux de rétention</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card mb-3">
+                            <div class="card-body text-center">
+                                <h3 class="mb-0">{{ rapport.valeur_client_moyen }} F CFA</h3>
+                                <p class="card-text">Valeur moyenne/client</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Graphique distribution des clients -->
+                <div class="mt-3">
+                    <h5>Répartition des clients par type de service</h5>
+                    <canvas id="clientsDistributionChart" width="800" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tendances et comparaisons -->
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0">Tendances et comparaisons</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-secondary">
+                    <h5><i class="fas fa-chart-line me-2"></i> Évolution par rapport à la période précédente</h5>
+                    <div class="row mt-3">
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    {% if rapport.evolution_reservations >= 0 %}
+                                        <i class="fas fa-arrow-up text-success fa-2x"></i>
+                                    {% else %}
+                                        <i class="fas fa-arrow-down text-danger fa-2x"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0">Réservations</h6>
+                                    <p class="mb-0 {% if rapport.evolution_reservations >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                        {{ rapport.evolution_reservations|floatformat:1 }}%
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    {% if rapport.evolution_revenus >= 0 %}
+                                        <i class="fas fa-arrow-up text-success fa-2x"></i>
+                                    {% else %}
+                                        <i class="fas fa-arrow-down text-danger fa-2x"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0">Revenus</h6>
+                                    <p class="mb-0 {% if rapport.evolution_revenus >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                        {{ rapport.evolution_revenus|floatformat:1 }}%
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    {% if rapport.evolution_clients >= 0 %}
+                                        <i class="fas fa-arrow-up text-success fa-2x"></i>
+                                    {% else %}
+                                        <i class="fas fa-arrow-down text-danger fa-2x"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0">Clients</h6>
+                                    <p class="mb-0 {% if rapport.evolution_clients >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                        {{ rapport.evolution_clients|floatformat:1 }}%
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    {% if rapport.evolution_satisfaction >= 0 %}
+                                        <i class="fas fa-arrow-up text-success fa-2x"></i>
+                                    {% else %}
+                                        <i class="fas fa-arrow-down text-danger fa-2x"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0">Satisfaction</h6>
+                                    <p class="mb-0 {% if rapport.evolution_satisfaction >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                        {{ rapport.evolution_satisfaction|floatformat:1 }}%
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Graphique d'évolution -->
+                <div class="mt-4">
+                    <canvas id="evolutionChart" width="800" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts pour les graphiques -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Configuration des couleurs
+        const colors = [
+            '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+            '#6f42c1', '#fd7e14', '#20c9a6', '#5a5c69', '#858796'
+        ];
+        
+        // Graphique des services
+        {% if services_popularite %}
+        const servicesCtx = document.getElementById('servicesChart').getContext('2d');
+        new Chart(servicesCtx, {
+            type: 'pie',
+            data: {
+                labels: [{% for service in services_popularite %}'{{ service.service_nom }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    data: [{% for service in services_popularite %}{{ service.nombre_reservations }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                    backgroundColor: colors.slice(0, {{ services_popularite|length }}),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Répartition des services'
+                    }
+                }
+            }
+        });
+        {% endif %}
+        
+        // Graphique des performances employés
+        {% if performances_employes %}
+        const employesCtx = document.getElementById('employesChart').getContext('2d');
+        new Chart(employesCtx, {
+            type: 'bar',
+            data: {
+                labels: [{% for perf in performances_employes %}'{{ perf.employe.prenom }} {{ perf.employe.nom }}'{% if not forloop.last %}, {% endif %}{% endfor %}],
+                datasets: [{
+                    label: 'Services réalisés',
+                    data: [{% for perf in performances_employes %}{{ perf.services_realises }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                    backgroundColor: '#4e73df',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Note moyenne (x2)',
+                    data: [{% for perf in performances_employes %}{% if perf.note_moyenne > 0 %}{{ perf.note_moyenne|floatformat:1 }}{% else %}0{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                    backgroundColor: '#1cc88a',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Performances des employés'
+                    }
+                }
+            }
+        });
+        {% endif %}
+        
+        // Graphique d'occupation
+        {% if rapport.labels_occupation and rapport.donnees_occupation %}
+        const occupationCtx = document.getElementById('occupationChart').getContext('2d');
+        new Chart(occupationCtx, {
+            type: 'line',
+            data: {
+                labels: {{ rapport.labels_occupation|safe }},
+                datasets: [{
+                    label: 'Taux d\'occupation (%)',
+                    data: {{ rapport.donnees_occupation|safe }},
+                    borderColor: '#36b9cc',
+                    backgroundColor: 'rgba(54, 185, 204, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        title: {
+                            display: true,
+                            text: 'Occupation (%)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: {% if rapport.type_periode == 'journalier' %}'Heures'{% elif rapport.type_periode == 'hebdomadaire' %}'Jours'{% elif rapport.type_periode == 'mensuel' %}'Jours'{% else %}'Mois'{% endif %}
+                        }
+                    }
+                }
+            }
+        });
+        {% else %}
+        // Afficher un message si les données d'occupation ne sont pas disponibles
+        document.getElementById('occupationChart').insertAdjacentHTML('beforebegin', 
+            '<div class="alert alert-warning">Données d\'occupation non disponibles pour cette période.</div>');
+        {% endif %}
+        
+        // Graphique distribution des clients
+        {% if rapport.labels_clients and rapport.donnees_clients %}
+        const clientsDistributionCtx = document.getElementById('clientsDistributionChart').getContext('2d');
+        new Chart(clientsDistributionCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ rapport.labels_clients|safe }},
+                datasets: [{
+                    data: {{ rapport.donnees_clients|safe }},
+                    backgroundColor: colors.slice(0, {{ rapport.labels_clients|length|default:0 }}),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Distribution des clients par catégorie'
+                    }
+                }
+            }
+        });
+        {% else %}
+        // Afficher un message si les données de distribution des clients ne sont pas disponibles
+        document.getElementById('clientsDistributionChart').insertAdjacentHTML('beforebegin', 
+            '<div class="alert alert-warning">Données de distribution des clients non disponibles pour cette période.</div>');
+        {% endif %}
+        
+        // Graphique d'évolution
+        const evolutionCtx = document.getElementById('evolutionChart').getContext('2d');
+        new Chart(evolutionCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Réservations', 'Revenus', 'Clients', 'Satisfaction'],
+                datasets: [{
+                    label: 'Évolution (%)',
+                    data: [
+                        {{ rapport.evolution_reservations|floatformat:1 }}, 
+                        {{ rapport.evolution_revenus|floatformat:1 }}, 
+                        {{ rapport.evolution_clients|floatformat:1 }}, 
+                        {{ rapport.evolution_satisfaction|floatformat:1 }}
+                    ],
+                    backgroundColor: [
+                        {% if rapport.evolution_reservations >= 0 %}'#1cc88a'{% else %}'#e74a3b'{% endif %},
+                        {% if rapport.evolution_revenus >= 0 %}'#1cc88a'{% else %}'#e74a3b'{% endif %},
+                        {% if rapport.evolution_clients >= 0 %}'#1cc88a'{% else %}'#e74a3b'{% endif %},
+                        {% if rapport.evolution_satisfaction >= 0 %}'#1cc88a'{% else %}'#e74a3b'{% endif %}
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Évolution (%)'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Évolution par rapport à la période précédente'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

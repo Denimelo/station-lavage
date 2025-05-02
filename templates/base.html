@@ -8,80 +8,126 @@
     <title>{% block title %}AquaNova SARL{% endblock %}</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css">
+    <!-- Animation CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         /* Styles personnalisés globaux */
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
+            --primary: #0ea5e9;
+            --primary-dark: #0284c7;
+            --primary-light: #e0f2fe;
             --secondary: #6c757d;
-            --success: #28a745;
-            --danger: #dc3545;
-            --warning: #ffc107;
-            --info: #17a2b8;
-            --light: #f8f9fa;
-            --dark: #343a40;
-            --accent: #06b6d4;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #06b6d4;
+            --light: #f8fafc;
+            --dark: #0f172a;
+            --accent: #8b5cf6;
+            --transition: all 0.3s ease;
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background-color: var(--light);
+            position: relative;
+            min-height: 100vh;
+            padding-bottom: 270px; /* Ajusté pour le footer */
         }
         
+        /* Navigation améliorée */
         .navbar {
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+            padding: 15px 0;
+            transition: var(--transition);
+        }
+        
+        .navbar.scrolled {
+            padding: 8px 0;
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
         }
         
         .navbar-brand {
-            font-weight: bold;
+            font-weight: 700;
             display: flex;
             align-items: center;
+            font-size: 1.5rem;
+            transition: var(--transition);
         }
         
         .navbar-brand img {
-            height: 40px;
+            height: 45px;
             margin-right: 10px;
+            transition: var(--transition);
+        }
+        
+        .navbar.scrolled .navbar-brand img {
+            height: 40px;
         }
         
         .nav-link {
             font-weight: 500;
-            transition: all 0.3s ease;
+            position: relative;
+            margin: 0 5px;
+            padding: 8px 15px !important;
+            border-radius: 5px;
+            transition: var(--transition) !important;
+        }
+        
+        .nav-link:before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: white;
+            transition: var(--transition);
+            transform: translateX(-50%);
+        }
+        
+        .nav-link:hover:before {
+            width: 70%;
         }
         
         .nav-link:hover {
             transform: translateY(-2px);
+            color: white !important;
         }
         
-        footer {
-            background-color: var(--dark);
-            color: white;
-            padding: 2rem 0;
-            margin-top: 3rem;
+        .nav-link.active:before {
+            width: 70%;
         }
         
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.8);
-            transition: color 0.3s ease;
+        .navbar-dark .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.85);
         }
         
-        .footer-links a:hover {
-            color: white;
-            text-decoration: none;
+        /* Buttons */
+        .btn {
+            border-radius: 6px;
+            font-weight: 500;
+            padding: 8px 20px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
         
-        .social-icons {
-            font-size: 1.5rem;
+        .btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: var(--transition);
         }
         
-        .social-icons a {
-            color: rgba(255, 255, 255, 0.8);
-            margin-right: 15px;
-            transition: all 0.3s ease;
-        }
-        
-        .social-icons a:hover {
-            color: white;
-            transform: translateY(-3px);
+        .btn:hover:before {
+            left: 100%;
         }
         
         .btn-primary {
@@ -92,17 +138,151 @@
         .btn-primary:hover {
             background-color: var(--primary-dark);
             border-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-outline-light {
+            border-width: 2px;
+        }
+        
+        .btn-outline-light:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Dropdown menu */
+        .dropdown-menu {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .dropdown-item {
+            border-radius: 5px;
+            padding: 8px 15px;
+            transition: var(--transition);
+        }
+        
+        .dropdown-item:hover {
+            background-color: var(--primary-light);
+            transform: translateX(5px);
+        }
+        
+        .dropdown-divider {
+            margin: 5px 0;
+        }
+        
+        /* Footer amélioré */
+        footer {
+            background: linear-gradient(135deg, var(--dark) 0%, #1e293b 100%);
+            color: white;
+            padding: 3rem 0 1.5rem;
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+        
+        .footer-links {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            transition: var(--transition);
+            display: block;
+            padding: 5px 0;
+        }
+        
+        .footer-links a:hover {
+            color: white;
+            text-decoration: none;
+            transform: translateX(5px);
+        }
+        
+        .footer-links a i {
+            margin-right: 8px;
+            font-size: 12px;
+        }
+        
+        .social-icons {
+            font-size: 1.5rem;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .social-icons a {
+            color: rgba(255, 255, 255, 0.8);
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .social-icons a:hover {
+            color: white;
+            transform: translateY(-5px);
+            background: var(--primary);
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        /* Responsive */
+        @media (max-width: 767.98px) {
+            body {
+                padding-bottom: 450px;
+            }
+            
+            .navbar-collapse {
+                background-color: var(--primary);
+                border-radius: 10px;
+                padding: 15px;
+                margin-top: 10px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+            
+            .nav-link:before {
+                display: none;
+            }
+        }
+        
+        /* Contact info style */
+        .contact-info i {
+            min-width: 25px;
+            display: inline-block;
+        }
+        
+        .hours-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            margin-top: 5px;
         }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">
-                <img src="{% static 'images/aquanova-logo.png' %}" alt="AquaNova SARL" onerror="this.onerror=null; this.src='/api/placeholder/40/40'; this.alt='AquaNova';">
-                AquaNova SARL
+            <a class="navbar-brand animate__animated animate__fadeIn" href="{% url 'home' %}">
+                <img src="{% static 'images/aquanova-logo.png' %}" alt="AquaNova SARL" onerror="this.onerror=null; this.src='/api/placeholder/45/45'; this.alt='AquaNova';">
+                <span>AquaNova</span>
             </a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -110,101 +290,134 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home' %}">Accueil</a>
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'home' %}">
+                            <i class="fas fa-home"></i> Accueil
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#services">Services</a>
+                        <a class="nav-link" href="#services">
+                            <i class="fas fa-car-wash"></i> Services
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#contact">Contact</a>
+                        <a class="nav-link" href="#contact">
+                            <i class="fas fa-envelope"></i> Contact
+                        </a>
                     </li>
                     {% if user.is_authenticated %}
                         {% if user.role == 'client' %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'dashboard_client' %}">Mon tableau de bord</a>
+                                <a class="nav-link" href="{% url 'dashboard_client' %}">
+                                    <i class="fas fa-tachometer-alt"></i> Mon espace
+                                </a>
                             </li>
                         {% elif user.role == 'employe' %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'dashboard_employe' %}">Mon tableau de bord</a>
+                                <a class="nav-link" href="{% url 'dashboard_employe' %}">
+                                    <i class="fas fa-tachometer-alt"></i> Mon espace
+                                </a>
                             </li>
                         {% elif user.role == 'gestionnaire' %}
                             <li class="nav-item">
-                                <a class="nav-link" href="{% url 'dashboard_gestionnaire' %}">Mon tableau de bord</a>
+                                <a class="nav-link" href="{% url 'dashboard_gestionnaire' %}">
+                                    <i class="fas fa-tachometer-alt"></i> Mon espace
+                                </a>
                             </li>
                         {% endif %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user-circle"></i> {{ user.prenom }}
+                                <div class="d-inline-block rounded-circle bg-white text-primary" style="width: 28px; height: 28px; text-align: center; line-height: 28px; font-weight: bold; margin-right: 5px;">
+                                    {{ user.prenom|first|upper }}
+                                </div>
+                                <span>{{ user.prenom }}</span>
                             </a>
                             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
-                                <a class="dropdown-item" href="{% url 'profile' %}">Mon profil</a>
-                                <a class="dropdown-item" href="{% url 'password_change' %}">Changer mot de passe</a>
+                                <a class="dropdown-item" href="{% url 'profile' %}">
+                                    <i class="fas fa-user-circle mr-2"></i> Mon profil
+                                </a>
+                                <a class="dropdown-item" href="{% url 'password_change' %}">
+                                    <i class="fas fa-key mr-2"></i> Changer mot de passe
+                                </a>
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="{% url 'logout' %}">Déconnexion</a>
+                                <a class="dropdown-item" href="{% url 'logout' %}">
+                                    <i class="fas fa-sign-out-alt mr-2"></i> Déconnexion
+                                </a>
                             </div>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Connexion</a>
+                            <a class="nav-link" href="{% url 'login' %}">
+                                <i class="fas fa-sign-in-alt"></i> Connexion
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link btn btn-outline-light btn-sm ml-2" href="{% url 'register' %}">Inscription</a>
+                            <a class="nav-link btn btn-outline-light btn-sm ml-2" href="{% url 'register' %}">
+                                <i class="fas fa-user-plus"></i> Inscription
+                            </a>
                         </li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
+    
+    <!-- Empty space for fixed navbar -->
+    <div style="padding-top: 80px;"></div>
 
     <!-- Main Content -->
-    {% block content %}{% endblock %}
+    <main>
+        {% block content %}{% endblock %}
+    </main>
 
     <!-- Footer -->
     <footer>
         <div class="container">
             <div class="row">
-                <div class="col-md-4">
-                    <h5>AquaNova SARL</h5>
-                    <p>La solution complète pour la gestion de votre station de lavage automobile au Togo.</p>
+                <div class="col-md-4 mb-4">
+                    <h5 class="font-weight-bold">
+                        <img src="{% static 'images/aquanova-logo.png' %}" alt="AquaNova SARL" onerror="this.onerror=null; this.src='/api/placeholder/30/30'; this.alt='AquaNova';" style="height: 30px; margin-right: 10px;">
+                        AquaNova SARL
+                    </h5>
+                    <p>La solution complète pour la gestion de votre station de lavage automobile au Togo. Qualité, efficacité et satisfaction garanties.</p>
                     <div class="social-icons mt-3">
-                        <a href="#" target="_blank"><i class="fab fa-facebook"></i></a>
-                        <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
-                        <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
-                        <a href="#" target="_blank"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <h5>Liens rapides</h5>
+                <div class="col-md-4 mb-4">
+                    <h5 class="font-weight-bold">Liens rapides</h5>
                     <ul class="list-unstyled footer-links">
-                        <li><a href="{% url 'home' %}">Accueil</a></li>
-                        <li><a href="#services">Nos services</a></li>
-                        <li><a href="#about">À propos</a></li>
-                        <li><a href="#contact">Contact</a></li>
+                        <li><a href="{% url 'home' %}"><i class="fas fa-chevron-right"></i> Accueil</a></li>
+                        <li><a href="#services"><i class="fas fa-chevron-right"></i> Nos services</a></li>
+                        <li><a href="#about"><i class="fas fa-chevron-right"></i> À propos</a></li>
+                        <li><a href="#contact"><i class="fas fa-chevron-right"></i> Contact</a></li>
                         {% if user.is_authenticated %}
-                            <li><a href="{% url 'logout' %}">Déconnexion</a></li>
+                            <li><a href="{% url 'logout' %}"><i class="fas fa-chevron-right"></i> Déconnexion</a></li>
                         {% else %}
-                            <li><a href="{% url 'login' %}">Connexion</a></li>
-                            <li><a href="{% url 'register' %}">Inscription</a></li>
+                            <li><a href="{% url 'login' %}"><i class="fas fa-chevron-right"></i> Connexion</a></li>
+                            <li><a href="{% url 'register' %}"><i class="fas fa-chevron-right"></i> Inscription</a></li>
                         {% endif %}
                     </ul>
                 </div>
-                <div class="col-md-4" id="contact">
-                    <h5>Contact</h5>
-                    <p>
-                        <i class="fas fa-map-marker-alt"></i> 123 Rue du Commerce, Lomé, Togo<br>
-                        <i class="fas fa-phone"></i> +228 90 12 34 56<br>
-                        <i class="fas fa-envelope"></i> contact@aquanova-togo.com
-                    </p>
+                <div class="col-md-4 mb-4" id="contact">
+                    <h5 class="font-weight-bold">Contact</h5>
+                    <div class="contact-info">
+                        <p><i class="fas fa-map-marker-alt"></i> 123 Rue du Commerce, Lomé, Togo</p>
+                        <p><i class="fas fa-phone"></i> +228 90 12 34 56</p>
+                        <p><i class="fas fa-envelope"></i> contact@aquanova-togo.com</p>
+                    </div>
                     <p class="mt-3">
                         <strong>Horaires d'ouverture:</strong><br>
-                        Lun-Sam: 7h30 - 20h00<br>
-                        Dim: 9h00 - 17h00
+                        <span class="hours-badge"><i class="fas fa-clock"></i> Lun-Sam: 7h30 - 20h00</span><br>
+                        <span class="hours-badge"><i class="fas fa-clock"></i> Dim: 9h00 - 17h00</span>
                     </p>
                 </div>
             </div>
             <div class="row mt-3">
                 <div class="col text-center">
-                    <hr class="bg-secondary">
+                    <hr class="bg-light opacity-25">
                     <p class="mb-0">&copy; {% now "Y" %} AquaNova SARL. Tous droits réservés.</p>
                 </div>
             </div>
@@ -212,12 +425,13 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.1/umd/popper.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/js/bootstrap.min.js"></script>
     <!-- Font Awesome -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
     <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    
     {% block extra_js %}{% endblock %}
 </body>
 </html>
