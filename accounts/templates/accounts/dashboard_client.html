@@ -3,6 +3,13 @@
 {% block dashboard_content %}
   <h2>Bienvenue {{ user.prenom }} !</h2>
   <p>Voici votre tableau de bord.</p>
+  <p><strong>Points fidélité :</strong> {{ request.user.points_fidelite }} pts</p>
+  {% if request.user.points_fidelite >= 100 %}
+    <div class="alert alert-success">
+      🎉 Bravo ! Une remise de 20% sera appliquée à votre prochaine réservation.
+    </div>
+  {% endif %}
+
 
   <a href="{% url 'clients:vehicules' %}" class="btn btn-primary">Mes véhicules</a>
   <a href="{% url 'clients:ajouter_vehicule' %}" class="btn btn-success">Ajouter un véhicule</a>

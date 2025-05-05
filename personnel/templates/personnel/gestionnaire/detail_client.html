@@ -1,0 +1,53 @@
+{% extends "base_dashboard.html" %}
+
+{% block dashboard_content %}
+
+<h2>Détails du client : {{ client.prenom }} {{ client.nom }}</h2>
+
+<ul class="list-group mb-4">
+  <li class="list-group-item"><strong>Email :</strong> {{ client.email }}</li>
+  <li class="list-group-item"><strong>Points fidélité :</strong> {{ client.points_fidelite }} pts</li>
+  <li class="list-group-item">
+    <strong>Remise fidélité :</strong>
+    {% if remise_disponible %}
+      <span class="badge bg-success">✅ 20% disponible</span>
+    {% else %}
+      <span class="badge bg-secondary">❌ non atteinte</span>
+    {% endif %}
+  </li>
+</ul>
+
+<h4>Historique des réservations</h4>
+<table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Véhicule</th>
+      <th>Service</th>
+      <th>Statut</th>
+      <th>Remise appliquée</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in reservations %}
+    <tr>
+      <td>{{ r.heure_debut|date:"d/m/Y H:i" }}</td>
+      <td>{{ r.vehicule.plaque_immatric }}</td>
+      <td>{{ r.service.nom }}</td>
+      <td>
+        <span class="badge bg-{{ r.statut|yesno:'success,warning,secondary,danger' }}">{{ r.get_statut_display }}</span>
+      </td>
+      <td>
+        {% if r.remise_appliquee %}
+          -{{ r.remise_appliquee }} F
+        {% else %}
+          /
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<a href="{% url 'personnel:liste_clients' %}" class="btn btn-outline-secondary mt-3">← Retour</a>
+{% endblock %}

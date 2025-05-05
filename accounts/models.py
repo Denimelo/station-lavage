@@ -30,6 +30,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     prenom = models.CharField(max_length=100)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    prime = models.PositiveIntegerField(default=0)  # bonus facultatif
+    points_fidelite = models.PositiveIntegerField(default=0)
 
     objects = CustomUserManager()
 

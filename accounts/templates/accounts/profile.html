@@ -1,7 +1,26 @@
 {% extends "base.html" %}
 {% block title %}Mon Profil{% endblock %}
+
 {% block content %}
-  <h2>Bienvenue {{ user.prenom }} {{ user.nom }}</h2>
-  <p>Rôle : {{ user.role }}</p>
-  <p>Email : {{ user.email }}</p>
+<div class="profile-container">
+    <div class="profile-header">
+        <h2>Mon Profil</h2>
+        <div class="welcome-message">Bienvenue, {{ user.prenom }} {{ user.nom }}</div>
+    </div>
+    
+    <div class="profile-card">
+        <div class="profile-field">
+            <span class="field-label">Rôle :</span>
+            <span class="field-value">{{ user.role|capfirst }}</span>
+        </div>
+        <div class="profile-field">
+            <span class="field-label">Email :</span>
+            <span class="field-value">{{ user.email }}</span>
+        </div>
+        <div class="profile-field">
+            <span class="field-label">Téléphone :</span>
+            <span class="field-value">{{ user.telephone }}</span>
+        </div>
+    </div>
+</div>
 {% endblock %}

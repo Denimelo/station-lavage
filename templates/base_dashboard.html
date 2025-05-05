@@ -309,7 +309,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">
+                        <a class="nav-link" href="{% url 'reservations:creer_reservation' %}">
                             <i class="fas fa-plus-circle"></i> Prendre rendez-vous
                         </a>
                     </li>
@@ -337,7 +337,7 @@
         <!-- Main content -->
         <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 dashboard-content">
             <!-- Welcome section -->
-            <div class="user-welcome animate-fadeInUp">
+            <!-- <div class="user-welcome animate-fadeInUp">
                 <div class="row align-items-center">
                     <div class="col-md-8">
                         <h2 class="mb-1">Bienvenue, {{ user.prenom }} {{ user.nom }}</h2>
@@ -346,22 +346,22 @@
                     <div class="col-md-4 text-md-right">
                         <div class="btn-group">
                             {% if user.role == 'gestionnaire' %}
-                            <a href="{% url 'create_service' %}" class="btn btn-light">
+                            <a href="{% url 'services:ajouter_service' %}" class="btn btn-light">
                                 <i class="fas fa-plus-circle"></i> Nouveau service
                             </a>
                             {% elif user.role == 'employe' %}
-                            <a href="{% url 'taches_disponibles' %}" class="btn btn-light">
+                            <a href="reservations:reservations_employe" class="btn btn-light">
                                 <i class="fas fa-clipboard-list"></i> Tâches disponibles
                             </a>
                             {% elif user.role == 'client' %}
-                            <a href="#" class="btn btn-light">
+                            <a href="{% url 'reservations:creer_reservation' %}" class="btn btn-light">
                                 <i class="fas fa-calendar-plus"></i> Nouveau rendez-vous
                             </a>
                             {% endif %}
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
             
             {% block dashboard_content %}
             <!-- Statistics cards -->

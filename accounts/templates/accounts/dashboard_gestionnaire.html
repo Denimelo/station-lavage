@@ -8,6 +8,12 @@
   <a href="{% url 'reservations:liste_reservations_gestionnaire' %}" class="btn btn-outline-secondary">
     📋 Réservations à traiter
   </a>
+  <a href="{% url 'personnel:liste_employes' %}" class="btn btn-outline-secondary">👷‍♂️ Gérer les employés</a>
+  <a href="{% url 'personnel:ajouter_employe' %}" class="btn btn-primary mb-3">
+    <i class="fas fa-user-plus"></i> Ajouter un employé
+  </a>
+  <a href="{% url 'personnel:liste_clients' %}" class="btn btn-outline-secondary">👷‍♂️ Gérer les clients</a>
+
   
 
 {% endblock %}

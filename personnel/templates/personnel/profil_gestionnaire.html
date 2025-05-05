@@ -1,7 +1,26 @@
 {% extends 'base.html' %}
+{% block title %}Profil Gestionnaire{% endblock %}
+
 {% block content %}
-<h2>Profil du gestionnaire</h2>
-<p><strong>Nom :</strong> {{ gestionnaire.user.prenom }} {{ gestionnaire.user.nom }}</p>
-<p><strong>Email :</strong> {{ gestionnaire.user.email }}</p>
-<p><strong>Bureau :</strong> {{ gestionnaire.bureau }}</p>
+<div class="profile-container manager">
+    <div class="profile-header">
+        <h2>Profil Gestionnaire</h2>
+        <div class="manager-name">{{ gestionnaire.user.prenom }} {{ gestionnaire.user.nom }}</div>
+    </div>
+    
+    <div class="profile-card">
+        <div class="profile-field">
+            <span class="field-label">Email :</span>
+            <span class="field-value">{{ gestionnaire.user.email }}</span>
+        </div>
+        <div class="profile-field">
+            <span class="field-label">Téléphone :</span>
+            <span class="field-value">{{ gestionnaire.user.telephone }}</span>
+        </div>
+        <div class="profile-field">
+            <span class="field-label">Bureau :</span>
+            <span class="field-value">{{ gestionnaire.bureau }}</span>
+        </div>
+    </div>
+</div>
 {% endblock %}

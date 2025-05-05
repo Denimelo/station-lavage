@@ -41,6 +41,7 @@ class Reservation(models.Model):
     heure_fin = models.DateTimeField(null=True, blank=True)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='en_attente')
     created_at = models.DateTimeField(auto_now_add=True, null=True)
+    remise_appliquee = models.PositiveIntegerField(default=0)  # en F CFA
 
     def __str__(self):
         return f"Réservation {self.id} - {self.client.prenom} - {self.statut}"

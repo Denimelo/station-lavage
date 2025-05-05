@@ -1,7 +1,26 @@
 {% extends 'base.html' %}
+{% block title %}Profil Employé{% endblock %}
+
 {% block content %}
-<h2>Profil de l'employé</h2>
-<p><strong>Nom :</strong> {{ employe.user.prenom }} {{ employe.user.nom }}</p>
-<p><strong>Email :</strong> {{ employe.user.email }}</p>
-<p><strong>Poste :</strong> {{ employe.poste }}</p>
+<div class="profile-container employee">
+    <div class="profile-header">
+        <h2>Profil Employé</h2>
+        <div class="employee-name">{{ employe.user.prenom }} {{ employe.user.nom }}</div>
+    </div>
+    
+    <div class="profile-card">
+        <div class="profile-field">
+            <span class="field-label">Email :</span>
+            <span class="field-value">{{ employe.user.email }}</span>
+        </div>
+        <div class="profile-field">
+            <span class="field-label">Téléphone :</span>
+            <span class="field-value">{{ employe.user.telephone }}</span>
+        </div>
+        <div class="profile-field">
+            <span class="field-label">Poste :</span>
+            <span class="field-value">{{ employe.poste }}</span>
+        </div>
+    </div>
+</div>
 {% endblock %}
