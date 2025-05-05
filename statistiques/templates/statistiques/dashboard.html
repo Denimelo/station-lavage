@@ -1,0 +1,77 @@
+{% extends "base_dashboard.html" %}
+{% load static %}
+
+{% block dashboard_content %}
+<div class="container mt-4">
+    <h2 class="mb-4">📊 Tableau de bord des performances</h2>
+
+    <form method="get" class="form-inline mb-4">
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Filtrer</button>
+    </form>
+
+    <div class="row text-center">
+        <div class="col-md-4">
+            <div class="card bg-success text-white mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">💰 Revenu Total</h5>
+                    <p class="card-text">{{ revenu_total|default:"0" }} F CFA</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">🧼 Services Réalisés</h5>
+                    <p class="card-text">{{ services_realises }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-warning text-white mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">📅 Réservations</h5>
+                    <p class="card-text">{{ nombre_reservations }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-secondary text-white mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">👥 Clients</h5>
+                    <p class="card-text">{{ nombre_clients }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card bg-dark text-white mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">👨‍🔧 Employés</h5>
+                    <p class="card-text">{{ nombre_employes }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h4 class="mt-5">📈 Services les plus demandés</h4>
+    <canvas id="topServicesChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('topServicesChart').getContext('2d');
+    const data = {
+        labels: [{% for service in top_services %}"{{ service.service__nom }}",{% endfor %}],
+        datasets: [{
+            label: 'Demandes',
+            data: [{% for service in top_services %}{{ service.total }},{% endfor %}],
+            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+        }]
+    };
+
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: data,
+    });
+</script>
+{% endblock %}
