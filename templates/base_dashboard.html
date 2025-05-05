@@ -61,125 +61,14 @@
                     </a>
                     <span class="tooltip-sidebar">static_dashboard</span>
                 </li>
-
-<<<<<<< HEAD
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'clients:ajouter_vehicule' %}">
-                            <i class="fas fa-history"></i> Ajouter un véhicule
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'reservations:reservations_client' %}">
-                            <i class="fas fa-calendar-check"></i> Mes réservations
-                        </a>
-                    </li>
-
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-history"></i> Historique des services
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'reservations:creer_reservation' %}">
-                            <i class="fas fa-plus-circle"></i> Prendre rendez-vous
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#">
-                            <i class="fas fa-award"></i> Programme de fidélité
-                        </a>
-                    </li>
-                    {% endif %}
-                    
-                    <li class="nav-item mt-4">
-                        <a class="nav-link" href="{% url 'profile' %}">
-                            <i class="fas fa-user-circle"></i> Mon profil
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">
-                            <i class="fas fa-sign-out-alt"></i> Déconnexion
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-
-        <!-- Main content -->
-        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4 dashboard-content">
-            <!-- Welcome section -->
-            <!-- <div class="user-welcome animate-fadeInUp">
-                <div class="row align-items-center">
-                    <div class="col-md-8">
-                        <h2 class="mb-1">Bienvenue, {{ user.prenom }} {{ user.nom }}</h2>
-                        <p class="mb-0">{{ now|date:"l j F Y" }} | Dernière connexion: {{ user.last_login|date:"j F Y à H:i" }}</p>
-                    </div>
-                    <div class="col-md-4 text-md-right">
-                        <div class="btn-group">
-                            {% if user.role == 'gestionnaire' %}
-                            <a href="{% url 'services:ajouter_service' %}" class="btn btn-light">
-                                <i class="fas fa-plus-circle"></i> Nouveau service
-                            </a>
-                            {% elif user.role == 'employe' %}
-                            <a href="reservations:reservations_employe" class="btn btn-light">
-                                <i class="fas fa-clipboard-list"></i> Tâches disponibles
-                            </a>
-                            {% elif user.role == 'client' %}
-                            <a href="{% url 'reservations:creer_reservation' %}" class="btn btn-light">
-                                <i class="fas fa-calendar-plus"></i> Nouveau rendez-vous
-                            </a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-            
-            {% block dashboard_content %}
-            <!-- Statistics cards -->
-            <div class="row">
-                <!-- Card 1 -->
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="dashboard-card stats-card animate-fadeInUp delay-1">
-                        <i class="fas fa-calendar-check"></i>
-                        <div class="stats-value">{{ stats.total_reservations }}</div>
-                        <div class="stats-label">Réservations totales</div>
-                    </div>
-                </div>
-                
-                <!-- Card 2 -->
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="dashboard-card stats-card animate-fadeInUp delay-2">
-                        <i class="fas fa-car"></i>
-                        <div class="stats-value">{{ stats.services_today }}</div>
-                        <div class="stats-label">Services aujourd'hui</div>
-                    </div>
-                </div>
-                
-                <!-- Card 3 -->
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="dashboard-card stats-card animate-fadeInUp delay-3">
-                        <i class="fas fa-money-bill-wave"></i>
-                        <div class="stats-value">{{ stats.revenue_today }} FCFA</div>
-                        <div class="stats-label">Revenus du jour</div>
-                    </div>
-                </div>
-                
-                <!-- Card 4 -->
-                <div class="col-xl-3 col-md-6 mb-4">
-                    <div class="dashboard-card stats-card animate-fadeInUp delay-4">
-=======
-                <li class="nav-item">
-                    <a class="nav-link {% if '/clients/' in request.path %}active{% endif %}" href="#">
->>>>>>> b0cc6615caa0cd6656bb6d36345936ec8f276b9d
+                    <a class="nav-link {% if '/clients/' in request.path %}active{% endif %}" href="{% url 'personnel:liste_clients' %}">
                         <i class="fas fa-users"></i>
                         <span class="link-text">Clients</span>
                     </a>
                     <span class="tooltip-sidebar">Clients</span>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {% if '/employes/' in request.path %}active{% endif %}" href="#">
+                    <a class="nav-link {% if '/employes/' in request.path %}active{% endif %}" href="{% url 'personnel:liste_employes' %}">
                         <i class="fas fa-user-tie"></i>
                         <span class="link-text">Employés</span>
                     </a>
@@ -269,13 +158,6 @@
             <div class="menu-category">Mon espace</div>
             <ul class="nav flex-column">
                 <li class="nav-item">
-                    <a class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}" href="{% url 'dashboard_client' %}">
-                        <i class="fas fa-home"></i>
-                        <span class="link-text">Accueil</span>
-                    </a>
-                    <span class="tooltip-sidebar">Accueil</span>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link {% if '/vehicules/' in request.path %}active{% endif %}" href="{% url 'clients:vehicules' %}">
                         <i class="fas fa-car"></i>
                         <span class="link-text">Mes véhicules</span>
@@ -348,52 +230,7 @@
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     
     <!-- Main Content -->
-    <div class="main-content" id="mainContent">
-        <!-- Header -->
-        <div class="page-header">
-            <div class="d-flex align-items-center">
-                <button class="mobile-nav-toggle mr-3 d-md-none" id="mobileNavToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <h1 class="page-title">
-                    {% if user.role == 'gestionnaire' %}
-                        Tableau de bord Gestionnaire
-                    {% elif user.role == 'employe' %}
-                        Tableau de bord Employé
-                    {% elif user.role == 'client' %}
-                        Tableau de bord Client
-                    {% else %}
-                        Tableau de bord
-                    {% endif %}
-                    
-                </h1>
-            </div>
-            <div class="header-actions">
-                <div class="header-search">
-                    <i class="fas fa-search"></i>
-                    <input type="text" placeholder="Rechercher...">
-                </div>
-                <div class="d-flex align-items-center">
-                    <button class="header-icon-btn position-relative">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-badge"></span>
-                    </button>
-                    <div class="user-dropdown">
-                        <button class="user-btn">
-                            <div class="user-avatar">
-                                {% if user.prenom %}
-                                    {{ user.prenom|first|upper }}{{ user.nom|first|upper }}
-                                {% else %}
-                                    <i class="fas fa-user"></i>
-                                {% endif %}
-                            </div>
-                            <span class="d-none d-md-block">{{ user.prenom }} {{ user.nom }}</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
+    <div class="main-content" id="mainContent">   
         <!-- Dashboard Content -->
         <div class="dashboard-container">
             {% block dashboard_content %}
