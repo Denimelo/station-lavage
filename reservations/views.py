@@ -1,11 +1,13 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import ReservationForm, EvaluationForm
+from .forms import ReservationForm, EvaluationForm, JustificationAnnulationForm, AssignationForm
 from .models import Evaluation,Vehicule, Service, Reservation
 from django.http import JsonResponse, HttpResponse
 from django.contrib import messages
 from accounts.models import CustomUser
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.timezone import now
+from django.utils.dateparse import parse_datetime
 
 @login_required
 def creer_reservation(request):
@@ -45,7 +47,7 @@ def evaluer_reservation(request, id):
     reservation = get_object_or_404(Reservation, id=id, client=request.user, statut='terminee')
 
     if hasattr(reservation, 'evaluation'):
-        return redirect('reservations:suivi_reservation', id=reservation.id)  # déjà évalué
+        return redirect('reservations:suivi_reservation', id=reservation.id)
 
     if request.method == 'POST':
         form = EvaluationForm(request.POST)
@@ -79,24 +81,38 @@ def reservations_employe(request):
 
 @login_required
 @user_passes_test(is_employe)
-def commencer_service(request, id):
-    reservation = get_object_or_404(Reservation, id=id, employe=request.user, statut='assignee')
+def commencer_service(request, reservation_id):
+    reservation = get_object_or_404(Reservation, id=reservation_id, employe=request.user)
     reservation.statut = 'en_cours'
+    reservation.temps_reel_debut = now()
     reservation.save()
     return redirect('reservations:reservations_employe')
 
 @login_required
 @user_passes_test(is_employe)
-def terminer_service(request, id):
-    reservation = get_object_or_404(Reservation, id=id, employe=request.user, statut='en_cours')
+def terminer_service(request, reservation_id):
+    reservation = get_object_or_404(Reservation, id=reservation_id, employe=request.user)
     reservation.statut = 'terminee'
+    reservation.temps_reel_fin = now()
     reservation.save()
+
+    # Ajouter points fidélité ici si nécessaire
+    if reservation.client:
+        reservation.client.points_fidelite += 10
+        reservation.client.save()
+
     return redirect('reservations:reservations_employe')
 
 @login_required
 @user_passes_test(is_employe)
 def api_planning_employe(request):
-    reservations = Reservation.objects.filter(employe=request.user).exclude(statut='annulee')
+    reservations = Reservation.objects.filter(
+        employe=request.user
+    ).exclude(
+        statut='annulee'
+    ).exclude(
+        heure_debut__isnull=True, heure_fin__isnull=True
+    )
 
     events = []
     for r in reservations:
@@ -104,11 +120,54 @@ def api_planning_employe(request):
             'title': f"{r.service.nom} ({r.vehicule.plaque_immatric})",
             'start': r.heure_debut.isoformat(),
             'end': r.heure_fin.isoformat(),
-            'url': f"/reservations/reservation/{r.id}/",  # à créer si tu veux voir les détails
-            'color': '#0d6efd' if r.statut == 'en_cours' else '#198754' if r.statut == 'terminee' else '#6c757d'
+            'url': f"/reservations/reservation/{r.id}/",  # page de détail employé/gestionnaire
+            'color': (
+                '#0d6efd' if r.statut == 'en_cours'
+                else '#198754' if r.statut == 'terminee'
+                else '#6c757d'  # assignée ou autre
+            )
         })
-    
+
     return JsonResponse(events, safe=False)
+
+@login_required
+@user_passes_test(lambda u: u.role == 'gestionnaire')
+def api_employes_disponibles(request):
+    heure_debut = request.GET.get('heure_debut')
+    if not heure_debut:
+        return JsonResponse({'error': 'heure_debut manquant'}, status=400)
+
+    heure_debut = parse_datetime(heure_debut)
+    if not heure_debut:
+        return JsonResponse({'error': 'format invalide'}, status=400)
+
+    # Récupère la durée estimée de la réservation courante (via param GET ou session)
+    reservation_id = request.GET.get('reservation_id')
+    if not reservation_id:
+        return JsonResponse({'error': 'reservation_id manquant'}, status=400)
+
+    from .models import Reservation
+    reservation = get_object_or_404(Reservation, pk=reservation_id)
+    heure_fin = heure_debut + reservation.duree_estimee()
+
+    # Filtrer les employés occupés
+    employes = CustomUser.objects.filter(role='employe', is_active=True)
+    disponibles = []
+
+    for emp in employes:
+        conflits = Reservation.objects.filter(
+            employe=emp,
+            statut__in=['assignee', 'en_cours'],
+            heure_debut__lt=heure_fin,
+            heure_fin__gt=heure_debut
+        )
+        if not conflits.exists():
+            disponibles.append({
+                'id': emp.id,
+                'nom': f"{emp.prenom} {emp.nom}"
+            })
+
+    return JsonResponse(disponibles, safe=False)
 
 @login_required
 @user_passes_test(is_employe)
@@ -116,46 +175,31 @@ def emploi_temps(request):
     return render(request, 'reservations/planning.html')
 
 @login_required
-@user_passes_test(is_employe)
-def detail_reservation_employe(request, id):
-    reservation = get_object_or_404(
-        Reservation.objects.select_related('client', 'vehicule', 'service'),
-        id=id,
-        employe=request.user
-    )
-    return render(request, 'reservations/detail_reservation.html', {
-        'reservation': reservation
-    })
-
-@login_required
 @user_passes_test(lambda u: u.role == 'gestionnaire')
-def assigner_employe(request, id):
-    reservation = get_object_or_404(Reservation, id=id, statut='en_attente')
+def assigner_employe(request, reservation_id):
+    reservation = get_object_or_404(Reservation, id=reservation_id)
 
-    # Liste des employés (tu peux filtrer plus finement si besoin)
-    employes = CustomUser.objects.filter(role='employe')
+    if request.user.role != 'gestionnaire':
+        return redirect('dashboard_client')
 
     if request.method == 'POST':
-        action = request.POST.get('action')
-
-        if action == 'annuler':
-            reservation.statut = 'annulee'
-            reservation.save()
-            messages.warning(request, "Réservation annulée.")
-            return redirect('reservations:liste_reservations_gestionnaire')
-
-        elif action == 'assigner':
-            employe_id = request.POST.get('employe')
-            employe = get_object_or_404(CustomUser, id=employe_id, role='employe')
+        form = AssignationForm(request.POST, reservation=reservation)
+        if form.is_valid():
+            employe = form.cleaned_data['employe']
+            heure_debut = form.cleaned_data['heure_debut']
             reservation.employe = employe
+            reservation.heure_debut = heure_debut
+            reservation.heure_fin = heure_debut + reservation.duree_estimee()
             reservation.statut = 'assignee'
             reservation.save()
-            messages.success(request, f"Réservation assignée à {employe.prenom} {employe.nom}.")
-            return redirect('reservations:liste_reservations_gestionnaire')
+            messages.success(request, f"Réservation assignée à {employe}.")
+            return redirect('reservations/liste_reservations.html')
+    else:
+        form = AssignationForm(reservation=reservation)
 
     return render(request, 'reservations/assigner_employe.html', {
         'reservation': reservation,
-        'employes': employes
+        'form': form
     })
 
 @login_required
@@ -208,3 +252,37 @@ def api_services_by_type_htmx(request):
         </select>
         """
         return HttpResponse(error_html)
+    
+@login_required
+def detail_reservation_employe(request, reservation_id):
+    reservation = get_object_or_404(Reservation, id=reservation_id, employe=request.user)
+    return render(request, 'personnel/employe/detail_reservation.html', {'reservation': reservation})
+
+@login_required
+def detail_reservation_gestionnaire(request, reservation_id):
+    if request.user.role != 'gestionnaire':
+        return redirect('dashboard_client')
+
+    reservation = get_object_or_404(Reservation, id=reservation_id)
+    return render(request, 'personnel/gestionnaire/detail_reservation.html', {'reservation': reservation})
+
+    
+@login_required
+def annuler_reservation(request, reservation_id):
+    reservation = get_object_or_404(Reservation, id=reservation_id)
+
+    # Autoriser client ou gestionnaire
+    if request.user != reservation.client and request.user.role != 'gestionnaire':
+        return redirect('dashboard_client')
+
+    if request.method == 'POST':
+        form = JustificationAnnulationForm(request.POST)
+        if form.is_valid():
+            reservation.commentaire_annulation = form.cleaned_data['commentaire']
+            reservation.statut = 'annulee'
+            reservation.save()
+            return redirect('reservations:liste_reservations_client' if request.user.role == 'client' else 'personnel:liste_reservations')
+    else:
+        form = JustificationAnnulationForm()
+
+    return render(request, 'reservations/annuler_reservation.html', {'reservation': reservation, 'form': form})

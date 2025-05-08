@@ -1,16 +1,140 @@
 {% extends "base_dashboard.html" %}
 
 {% block dashboard_content %}
-<h2>Évaluer le service</h2>
+<div class="container-fluid">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-light">
+          <h2 class="h4 mb-0">Évaluer votre expérience</h2>
+        </div>
+        <div class="card-body">
+          <div class="mb-4">
+            <h5 class="mb-3">Détails de la réservation</h5>
+            <div class="d-flex mb-2">
+              <div class="me-3 text-muted">Véhicule:</div>
+              <div>{{ reservation.vehicule.marque }} {{ reservation.vehicule.modele }}</div>
+            </div>
+            <div class="d-flex mb-2">
+              <div class="me-3 text-muted">Service:</div>
+              <div>{{ reservation.service.nom }}</div>
+            </div>
+            <div class="d-flex">
+              <div class="me-3 text-muted">Date:</div>
+              <div>{{ reservation.heure_debut|date:"d/m/Y" }}</div>
+            </div>
+          </div>
 
-<p><strong>Véhicule :</strong> {{ reservation.vehicule.marque }} {{ reservation.vehicule.modele }}</p>
-<p><strong>Service :</strong> {{ reservation.service.nom }}</p>
+          <hr class="my-4">
 
-<form method="POST">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit" class="btn btn-success">Soumettre l’évaluation</button>
-</form>
+          <form method="POST" id="evaluationForm">
+            {% csrf_token %}
+            
+            <div class="mb-4">
+              <h5 class="mb-3">Notez le service</h5>
+              <div class="rating-wrapper mb-3">
+                <div class="rating-input">
+                  {% for i in "54321" %}
+                    <input type="radio" id="star{{ i }}" name="note" value="{{ i }}" 
+                           {% if form.note.value == i %}checked{% endif %}>
+                    <label for="star{{ i }}" class="star-label">
+                      <i class="far fa-star"></i>
+                      <i class="fas fa-star"></i>
+                    </label>
+                  {% endfor %}
+                </div>
+                <div class="rating-caption text-muted mt-1">
+                  <small id="ratingText">Sélectionnez une note</small>
+                </div>
+              </div>
+              {{ form.note.errors }}
+            </div>
 
-<a href="{% url 'reservations:suivi_reservation' reservation.id %}" class="btn btn-outline-secondary mt-3">Annuler</a>
+            <div class="mb-4">
+              <h5 class="mb-3">Votre avis</h5>
+              <div class="form-floating">
+                {{ form.commentaire_evaluation }}
+                <label for="{{ form.commentaire_evaluation.id_for_label }}">Commentaire (optionnel)</label>
+              </div>
+              {{ form.commentaire_evaluation.errors }}
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+              <a href="{% url 'reservations:suivi_reservation' reservation.id %}" 
+                 class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Retour
+              </a>
+              <button type="submit" class="btn btn-success px-4">
+                <i class="fas fa-check me-2"></i>Envoyer l'évaluation
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .rating-input {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+  }
+  .rating-input input {
+    display: none;
+  }
+  .star-label {
+    color: #ddd;
+    font-size: 2rem;
+    padding: 0 0.2rem;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+  .star-label .fas {
+    display: none;
+  }
+  .rating-input input:checked ~ .star-label .far,
+  .rating-input input:checked ~ .star-label ~ .star-label .far,
+  .rating-input:not(:checked) ~ .star-label:hover .far,
+  .rating-input:not(:checked) ~ .star-label:hover ~ .star-label .far {
+    display: none;
+  }
+  .rating-input input:checked ~ .star-label .fas,
+  .rating-input input:checked ~ .star-label ~ .star-label .fas,
+  .rating-input:not(:checked) ~ .star-label:hover .fas,
+  .rating-input:not(:checked) ~ .star-label:hover ~ .star-label .fas {
+    display: inline-block;
+    color: #ffc107;
+  }
+  .form-floating textarea {
+    height: 120px;
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const ratingTexts = {
+      '1': 'Médiocre',
+      '2': 'Passable',
+      '3': 'Bien',
+      '4': 'Très bien',
+      '5': 'Excellent'
+    };
+    
+    const inputs = document.querySelectorAll('.rating-input input');
+    const ratingText = document.getElementById('ratingText');
+    
+    inputs.forEach(input => {
+      input.addEventListener('change', function() {
+        ratingText.textContent = ratingTexts[this.value];
+      });
+      
+      // Afficher le texte correspondant si une note est déjà sélectionnée
+      if (input.checked) {
+        ratingText.textContent = ratingTexts[input.value];
+      }
+    });
+  });
+</script>
 {% endblock %}

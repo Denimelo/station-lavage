@@ -3,6 +3,7 @@ from .models import Reservation
 from .models import Evaluation
 from clients.models import Vehicule
 from services.models import Service
+from accounts.models import CustomUser
 
 class ReservationForm(forms.ModelForm):
     class Meta:
@@ -44,8 +45,44 @@ class ReservationForm(forms.ModelForm):
 class EvaluationForm(forms.ModelForm):
     class Meta:
         model = Evaluation
-        fields = ['note', 'commentaire']
+        fields = ['note', 'commentaire_evaluation']
         widgets = {
-            'note': forms.Select(attrs={'class': 'form-select'}),
-            'commentaire': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'commentaire_evaluation': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Votre commentaire...'}),
         }
+        labels = {
+            'commentaire_evaluation': 'Commentaire (optionnel)'
+        }
+
+class JustificationAnnulationForm(forms.Form):
+    commentaire = forms.CharField(
+        label="Motif de l’annulation",
+        widget=forms.Textarea(attrs={'rows': 3}),
+        required=True
+    )
+
+class AssignationForm(forms.Form):
+    employe = forms.ModelChoiceField(
+        queryset=CustomUser.objects.filter(role='employe', is_active=True),
+        label="Employé à assigner"
+    )
+    heure_debut = forms.DateTimeField(
+        label="Heure de début d’assignation",
+        widget=forms.DateTimeInput(attrs={'type': 'datetime-local'})
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.reservation = kwargs.pop('reservation', None)
+        super().__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        employe = cleaned_data.get('employe')
+        heure_debut = cleaned_data.get('heure_debut')
+
+        if self.reservation and employe and heure_debut:
+            if not self.reservation.est_assignable_a(employe, heure_debut):
+                raise forms.ValidationError(
+                    f"L’employé {employe} n’est pas disponible de {heure_debut} à {heure_debut + self.reservation.duree_estimee()}"
+                )
+        return cleaned_data
+
