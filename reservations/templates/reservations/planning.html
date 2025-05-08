@@ -1,37 +1,139 @@
 {% extends "base_dashboard.html" %}
 
 {% block dashboard_content %}
-<h2>Mon planning</h2>
-<div id="calendar"></div>
+<div class="container-fluid">
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <h2 class="mb-0">Mon planning hebdomadaire</h2>
+      <p class="text-muted mb-0">Visualisation de vos réservations et services</p>
+    </div>
+    <div class="col-md-4">
+      <div class="input-group">
+        <select id="service-filter" class="form-select">
+          <option value="">Tous les services</option>
+          {% for service in services %}
+            <option value="{{ service.id }}">{{ service.nom }}</option>
+          {% endfor %}
+        </select>
+        <button id="today-btn" class="btn btn-outline-primary" type="button">
+          <i class="bi bi-calendar-day"></i> Aujourd'hui
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div id="calendar"></div>
+    </div>
+  </div>
+
+  <div class="mt-3">
+    <div class="alert alert-light d-flex align-items-center">
+      <i class="bi bi-info-circle-fill me-2"></i>
+      <div>
+        <strong>Légende :</strong>
+        <span class="badge bg-primary me-2">Réservation</span>
+        <span class="badge bg-success me-2">Service terminé</span>
+        <span class="badge bg-warning text-dark">Service en cours</span>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const calendarEl = document.getElementById('calendar');
-      const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'timeGridWeek',
-        headerToolbar: {
-          left: 'prev,next today',
-          center: 'title',
-          right: 'timeGridDay,timeGridWeek'
-        },
-        locale: 'fr',
-        events: "{% url 'reservations:api_planning_employe' %}",
-        height: 'auto',
-        slotMinTime: "07:00:00",
-        slotMaxTime: "20:00:00",
-        nowIndicator: true,
-        eventClick: function (info) {
-          if (info.event.url) {
-            window.location.href = info.event.url;
-            info.jsEvent.preventDefault();
-          }
-        }
-      });
-      calendar.render();
-    });
-  </script>
+<!-- FullCalendar -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/fr.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const calendarEl = document.getElementById('calendar');
+  const serviceFilter = document.getElementById('service-filter');
+  const todayBtn = document.getElementById('today-btn');
+  
+  // Configuration du calendrier
+  const calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'timeGridWeek',
+    locale: 'fr',
+    timeZone: 'local',
+    height: 'auto',
+    slotMinTime: "07:00:00",
+    slotMaxTime: "20:00:00",
+    nowIndicator: true,
+    firstDay: 1, // Lundi comme premier jour
+    dayHeaderFormat: { weekday: 'short', day: 'numeric' },
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'timeGridDay,timeGridWeek,dayGridMonth'
+    },
+    events: {
+      url: "{% url 'reservations:api_planning_employe' %}",
+      extraParams: function() {
+        return {
+          service_id: serviceFilter.value
+        };
+      }
+    },
+    eventTimeFormat: {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    },
+    eventDidMount: function(info) {
+      // Style différent selon le statut
+      if (info.event.extendedProps.statut === 'termine') {
+        info.el.style.backgroundColor = '#28a745';
+      } else if (info.event.extendedProps.statut === 'en_cours') {
+        info.el.style.backgroundColor = '#ffc107';
+        info.el.style.color = '#212529';
+      }
+      
+      // Tooltip avec plus d'informations
+      if (info.event.extendedProps.client) {
+        $(info.el).tooltip({
+          title: `
+            <strong>Client:</strong> ${info.event.extendedProps.client}<br>
+            <strong>Véhicule:</strong> ${info.event.extendedProps.vehicule}<br>
+            <strong>Notes:</strong> ${info.event.extendedProps.notes || 'Aucune'}
+          `,
+          html: true,
+          placement: 'top'
+        });
+      }
+    },
+    eventClick: function(info) {
+      if (info.event.url) {
+        window.location.href = info.event.url;
+      }
+    }
+  });
+
+  // Filtre par service
+  serviceFilter.addEventListener('change', function() {
+    calendar.refetchEvents();
+  });
+
+  // Bouton aujourd'hui
+  todayBtn.addEventListener('click', function() {
+    calendar.today();
+    calendar.changeView('timeGridDay');
+  });
+
+  calendar.render();
+
+  // Ajuster la hauteur du calendrier
+  function adjustCalendarHeight() {
+    const headerHeight = document.querySelector('.fc-header-toolbar').offsetHeight;
+    const viewHeight = window.innerHeight - headerHeight - 200;
+    calendar.setOption('height', Math.max(600, viewHeight));
+  }
+
+  window.addEventListener('resize', adjustCalendarHeight);
+  adjustCalendarHeight();
+});
+</script>
 {% endblock %}

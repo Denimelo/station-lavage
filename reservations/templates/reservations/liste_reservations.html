@@ -37,7 +37,9 @@
           {% if r.statut == 'en_attente' %}
             <a href="{% url 'reservations:assigner_employe' r.id %}" class="btn btn-sm btn-outline-primary">Assigner</a>
           {% else %}
-            <span class="text-muted">—</span>
+            <a href="{% url 'reservations:detail_reservation_gestionnaire' r.id %}" class="btn btn-sm btn-outline-info">
+              Détails
+            </a>
           {% endif %}
         </td>
       </tr>

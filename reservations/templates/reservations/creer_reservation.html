@@ -1,37 +1,128 @@
 {% extends "base_dashboard.html" %}
 
 {% block dashboard_content %}
-<h2>Nouvelle réservation</h2>
-<form method="POST">
-    {% csrf_token %}
-  
-    <!-- Sélection du véhicule -->
-    <label for="id_vehicule">Véhicule</label>
-    <select name="vehicule" id="id_vehicule" class="form-select"
-          hx-get="{% url 'reservations:api_services_by_type_htmx' %}"
-          hx-target="#service-options"
-          hx-trigger="change"
-          hx-swap="outerHTML"
-          hx-include="[name=vehicule]">
-    {% for vehicule in form.fields.vehicule.queryset %}
-      <option value="{{ vehicule.id }}">{{ vehicule.marque }} {{ vehicule.modele }} ({{ vehicule.plaque_immatric }})</option>
-    {% endfor %}
-  </select>
-  
-    <!-- Sélection du service (sera mis à jour dynamiquement) -->
-    <label for="id_service">Service</label>
-    <select name="service" id="service-options" class="form-select">
-      <option value="">--- Choisissez un service ---</option>
-      <option value="">---  Autres ---</option>
-      {% for vehicule in form.fields.vehicule.queryset %}
-      <option value="{{ service.id }}">{{ service.nom }}</option>
-    {% endfor %}
-    </select>
-  
-    {{ form.heure_debut.label_tag }} {{ form.heure_debut }}
-    {{ form.heure_fin.label_tag }} {{ form.heure_fin }}
+<div class="container-fluid">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h2 class="h4 mb-0">Nouvelle réservation</h2>
+        </div>
+        
+        <div class="card-body">
+          <form method="POST" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <!-- Affichage des erreurs générales du formulaire -->
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                  <p class="mb-0">{{ error }}</p>
+                {% endfor %}
+              </div>
+            {% endif %}
+            
+            <!-- Sélection du véhicule -->
+            <div class="mb-3">
+              <label for="id_vehicule" class="form-label fw-bold">Véhicule</label>
+              <select name="vehicule" id="id_vehicule" class="form-select"
+                    hx-get="{% url 'reservations:api_services_by_type_htmx' %}"
+                    hx-target="#service-options-container"
+                    hx-trigger="change"
+                    hx-swap="innerHTML"
+                    hx-include="[name=vehicule]"
+                    required>
+                <option value="">--- Sélectionnez un véhicule ---</option>
+                {% for vehicule in form.fields.vehicule.queryset %}
+                  <option value="{{ vehicule.id }}" {% if form.vehicule.value|stringformat:"s" == vehicule.id|stringformat:"s" %}selected{% endif %}>
+                    {{ vehicule.marque }} {{ vehicule.modele }} ({{ vehicule.plaque_immatric }})
+                  </option>
+                {% endfor %}
+              </select>
+              {% if form.vehicule.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.vehicule.errors|join:", " }}
+                </div>
+              {% endif %}
+            </div>
+            
+            <!-- Sélection du service (dynamique) -->
+            <div class="mb-3" id="service-options-container">
+              <label for="id_service" class="form-label fw-bold">Service</label>
+              <select name="service" id="id_service" class="form-select" required>
+                <option value="">--- Choisissez d'abord un véhicule ---</option>
+              </select>
+              {% if form.service.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.service.errors|join:", " }}
+                </div>
+              {% endif %}
+            </div>
+            
+            <!-- Date et heure de début -->
+            <div class="mb-3">
+              {{ form.heure_debut.label_tag }}
+              <div class="input-group">
+                {{ form.heure_debut }}
+                <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+              </div>
+              {% if form.heure_debut.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.heure_debut.errors|join:", " }}
+                </div>
+              {% endif %}
+            </div>
+            
+            <!-- Date et heure de fin -->
+            <div class="mb-3">
+              {{ form.heure_fin.label_tag }}
+              <div class="input-group">
+                {{ form.heure_fin }}
+                <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+              </div>
+              {% if form.heure_fin.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.heure_fin.errors|join:", " }}
+                </div>
+              {% endif %}
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-calendar-check me-2"></i>Réserver
+              </button>
+              <a href="{% url 'reservations:reservations_client' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle me-2"></i>Annuler
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
+<!-- Script pour la validation côté client -->
+<script>
+// Exemple de validation Bootstrap (à adapter selon vos besoins)
+(function () {
+  'use strict'
   
-    <button type="submit" class="btn btn-success mt-3">Réserver</button>
-  </form>
+  // Récupère tous les formulaires auxquels nous voulons appliquer les styles de validation Bootstrap
+  var forms = document.querySelectorAll('.needs-validation')
+  
+  // Boucle sur les formulaires et empêche la soumission
+  Array.prototype.slice.call(forms)
+    .forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+        
+        form.classList.add('was-validated')
+      }, false)
+    })
+})()
+</script>
 {% endblock %}
