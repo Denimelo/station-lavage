@@ -19,11 +19,20 @@ class CustomUserCreationForm(forms.ModelForm):
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError("Les mots de passe ne correspondent pas.")
         return password2
+    
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email:
+            email = email.lower()  # Normaliser l'email en minuscules
+            if CustomUser.objects.filter(email=email).exists():
+                raise forms.ValidationError("Cette adresse email est déjà utilisée.")
+        return email
 
     def save(self, commit=True):
         user = super().save(commit=False)
         user.set_password(self.cleaned_data["password1"])
         user.role = 'client'  # 👈 Rôle fixé côté serveur
+        user.is_active = False  # L'utilisateur sera activé après confirmation
         if commit:
             user.save()
         return user

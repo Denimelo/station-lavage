@@ -1,5 +1,8 @@
+import uuid
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from django.db import models
+from django.utils import timezone
+from django.conf import settings
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -32,6 +35,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     prime = models.PositiveIntegerField(default=0)  # bonus facultatif
     points_fidelite = models.PositiveIntegerField(default=0)
+    email_confirmed = models.BooleanField(default=False)  # Nouveau champ
 
     objects = CustomUserManager()
 
@@ -41,3 +45,18 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return f"{self.prenom} {self.nom} ({self.role})"
 
+
+class EmailConfirmation(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    token = models.UUIDField(default=uuid.uuid4, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_confirmed = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"Confirmation pour {self.user.email}"
+    
+    @property
+    def is_expired(self):
+        # Expiration après 24 heures
+        expiration_time = self.created_at + timezone.timedelta(hours=24)
+        return timezone.now() > expiration_time

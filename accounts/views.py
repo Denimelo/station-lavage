@@ -1,24 +1,84 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from django.http import HttpResponse
 from django.urls import reverse
 from services.models import Service
 from django.contrib.auth.decorators import login_required
-from .forms import CustomUserCreationForm, CustomAuthenticationForm
+from django.contrib import messages
+from .models import EmailConfirmation, CustomUser
+from .utils import send_confirmation_email
+from .forms import CustomUser, CustomUserCreationForm, CustomAuthenticationForm
 
 # 🔹 Vue d'inscription client
+# 🔹 Vue d'inscription client modifiée
 def register_client(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
-            messages.success(request, "Compte client créé avec succès.")
-            return redirect(get_dashboard_redirect(user))
+            # Envoyer l'email de confirmation
+            send_confirmation_email(user, request)
+            messages.success(
+                request, 
+                "Compte créé avec succès! Veuillez vérifier votre email pour activer votre compte."
+            )
+            return redirect('login')
     else:
         form = CustomUserCreationForm()
     return render(request, 'accounts/register.html', {'form': form})
+
+# 🔹 Vue de confirmation d'email
+def confirm_email(request, token):
+    try:
+        confirmation = get_object_or_404(EmailConfirmation, token=token)
+        
+        if confirmation.is_confirmed:
+            messages.info(request, "Votre email a déjà été confirmé. Vous pouvez vous connecter.")
+            return redirect('login')
+        
+        if confirmation.is_expired:
+            messages.error(
+                request, 
+                "Ce lien de confirmation a expiré. Un nouveau lien a été envoyé à votre adresse email."
+            )
+            send_confirmation_email(confirmation.user, request)
+            return redirect('login')
+        
+        # Activer le compte
+        user = confirmation.user
+        user.is_active = True
+        user.email_confirmed = True
+        user.save()
+        
+        confirmation.is_confirmed = True
+        confirmation.save()
+        
+        messages.success(
+            request, 
+            "Votre email a été confirmé avec succès! Vous pouvez maintenant vous connecter."
+        )
+        return redirect('login')
+    
+    except Exception as e:
+        messages.error(request, "Lien de confirmation invalide.")
+        return redirect('login')
+
+# 🔹 Vue pour renvoyer l'email de confirmation
+def resend_confirmation(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        try:
+            user = CustomUser.objects.get(email=email)
+            if user.email_confirmed:
+                messages.info(request, "Votre email a déjà été confirmé. Vous pouvez vous connecter.")
+            else:
+                send_confirmation_email(user, request)
+                messages.success(request, "Un nouveau lien de confirmation a été envoyé à votre adresse email.")
+        except CustomUser.DoesNotExist:
+            messages.error(request, "Aucun compte n'est associé à cette adresse email.")
+    
+    return render(request, 'accounts/resend_confirmation.html')
 
 # 🔹 Vue de connexion
 def login_view(request):
@@ -26,6 +86,15 @@ def login_view(request):
         form = CustomAuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
+            
+            # Vérifier si l'email est confirmé
+            if not user.email_confirmed:
+                messages.error(
+                    request, 
+                    "Votre email n'a pas été confirmé. Veuillez vérifier votre boîte mail ou demander un nouvel email de confirmation."
+                )
+                return render(request, 'accounts/login.html', {'form': form})
+            
             login(request, user)
             return redirect(get_dashboard_redirect(user))
     else:
